@@ -1,6 +1,6 @@
 {
+  "editor.formatOnSave": true,
   "[sourcepawn]": {
     "editor.formatOnSave": false
-  },
-  "editor.formatOnSave": true
+  }
 }

@@ -1,0 +1,11 @@
+[package]
+name = "formatter"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tree-sitter-sourcepawn = { path = "C:\\Users\\cza\\Projects\\tree-sitter-sourcepawn" }
+tree-sitter = "0.20.8"
+
+[build-dependencies]
+cc = "1.0"

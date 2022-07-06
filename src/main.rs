@@ -1,5 +1,6 @@
 use std::{fs, str::Utf8Error};
 use tree_sitter::{Node, Parser};
+use wasm_bindgen::prelude::*;
 
 struct Formatter<'a> {
     output: String,
@@ -7,19 +8,30 @@ struct Formatter<'a> {
 }
 
 fn main() -> Result<(), Utf8Error> {
+    let filename = "test.sp";
+    let source =
+        fs::read_to_string(filename).expect("Something went wrong while reading the file.");
+    fs::write(filename, format_string(&source)?).expect("Something went wrong writing the file.");
+    Ok(())
+}
+
+#[wasm_bindgen]
+pub fn sp_format(input: String) -> Result<String, JsValue> {
+    let output =
+        format_string(&input).expect("An error has occured while generating the SourcePawn code.");
+    Ok(output)
+}
+
+fn format_string(input: &String) -> Result<String, Utf8Error> {
     let mut parser = Parser::new();
     parser
         .set_language(tree_sitter_sourcepawn::language())
         .expect("Error loading SourcePawn grammar");
-    let filename = "test.sp";
-    let source =
-        fs::read_to_string(filename).expect("Something went wrong while reading the file.");
-
-    let parsed = parser.parse(&source, None).unwrap();
+    let parsed = parser.parse(&input, None).unwrap();
     let mut cursor = parsed.walk();
     let mut formatter = Formatter {
         output: String::new(),
-        source: source.as_bytes(),
+        source: input.as_bytes(),
     };
     for node in parsed.root_node().children(&mut cursor) {
         match node.kind() {
@@ -27,8 +39,7 @@ fn main() -> Result<(), Utf8Error> {
             _ => formatter.output.push_str(node.utf8_text(formatter.source)?),
         };
     }
-    fs::write(filename, formatter.output).expect("Something went wrong writing the file.");
-    Ok(())
+    Ok(formatter.output)
 }
 
 fn write_global_variable(node: Node, formatter: &mut Formatter) -> Result<(), Utf8Error> {

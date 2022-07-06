@@ -1,0 +1,38 @@
+name: Build WASM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup cache
+        id: cache-system-libraries
+        uses: actions/cache@v2
+        with:
+          path: ${{env.EM_CACHE_FOLDER}}
+          key: ${{env.EM_VERSION}}-${{ runner.os }}
+      - uses: jetli/wasm-pack-action@v0.3.0
+        with:
+          version: "latest"
+      - name: Build wasm
+        run: wasm-bindgen build
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: v0.1.0
+          artifacts: "*.wasm"
+          body: ""
+          draft: false
+          allowUpdates: true
+          prerelease: false
+          replacesArtifacts: true

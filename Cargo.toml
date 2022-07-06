@@ -3,9 +3,15 @@ name = "sp_format"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+path = "src/main.rs"
+
 [dependencies]
 tree-sitter-sourcepawn = { path = "..\\tree-sitter-sourcepawn" }
 tree-sitter = "0.20.8"
+wasm-bindgen = "0.2.63"
 
 [build-dependencies]
 cc = "1.0"
+wasm-bindgen-test = "0.3.13"

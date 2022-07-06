@@ -17,6 +17,8 @@ jobs:
         with:
           version: latest
           platform: x64
+      - name: Test
+        run: find /usr/include/ -name "stdio.h"
       - uses: jetli/wasm-pack-action@v0.3.0
         with:
           version: "latest"

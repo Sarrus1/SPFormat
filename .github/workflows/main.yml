@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set up Clang
-        run: apt install libstdc++
+        run: sudo apt-get install libstdc++
       - uses: jetli/wasm-pack-action@v0.3.0
         with:
           version: "latest"

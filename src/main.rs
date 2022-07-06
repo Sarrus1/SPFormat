@@ -1,8 +1,8 @@
 use std::fs;
-use tree_sitter;
+use tree_sitter::{Parser, Node};
 
 fn main() {
-    let mut parser = tree_sitter::Parser::new();
+    let mut parser = Parser::new();
     parser
         .set_language(tree_sitter_sourcepawn::language())
         .expect("Error loading SourcePawn grammar");
@@ -22,7 +22,7 @@ fn main() {
     fs::write(filename, output).expect("Something went wrong writing the file.");
 }
 
-fn write_global_variable(node: tree_sitter::Node, buf: &mut String, source: &String) {
+fn write_global_variable(node: Node, buf: &mut String, source: &String) {
     let var_type = node
         .child_by_field_name("type")
         .unwrap()
@@ -31,8 +31,15 @@ fn write_global_variable(node: tree_sitter::Node, buf: &mut String, source: &Str
     buf.push_str(var_type);
     buf.push(' ');
     let mut cursor = node.walk();
+
+    /*
+     * Iterate over all declarations of this statement.
+     * Handle cases such as:
+     * int foo, bar;
+     */
     for child in node.children(&mut cursor) {
         if !(child.kind() == "variable_declaration") {
+            // TODO: Handle comments and preproc statements here.
             continue;
         }
         let var_name = child
@@ -41,9 +48,17 @@ fn write_global_variable(node: tree_sitter::Node, buf: &mut String, source: &Str
             .utf8_text(source.as_ref())
             .unwrap();
         buf.push_str(var_name);
+
         let mut cursor = child.walk();
-        let var_init_node = child.children_by_field_name("initialValue", &mut cursor);
-        for sub_child in var_init_node {
+        // Write the dimensions of a declaration, if they exist.
+        for sub_child in child.named_children(&mut cursor) {
+            if sub_child.kind() == "fixed_dimension" || sub_child.kind() == "dimension" {
+                buf.push_str(sub_child.utf8_text(source.as_ref()).unwrap());
+            }
+        }
+
+        // Write the default value of a declaration, if it exists.
+        for sub_child in child.children_by_field_name("initialValue", &mut cursor) {
             if sub_child.kind() == "=" {
                 buf.push_str(" = ");
                 continue;

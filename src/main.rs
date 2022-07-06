@@ -1,5 +1,5 @@
 use std::fs;
-use tree_sitter::{Parser, Node};
+use tree_sitter::{Node, Parser};
 
 fn main() {
     let mut parser = Parser::new();
@@ -23,21 +23,25 @@ fn main() {
 }
 
 fn write_global_variable(node: Node, buf: &mut String, source: &String) {
-    let var_type = node
-        .child_by_field_name("type")
-        .unwrap()
-        .utf8_text(source.as_ref())
-        .unwrap();
-    buf.push_str(var_type);
-    buf.push(' ');
     let mut cursor = node.walk();
+    let mut variable_declarations: Vec<Node> = Vec::new();
 
-    /*
-     * Iterate over all declarations of this statement.
-     * Handle cases such as:
-     * int foo, bar;
-     */
-    for child in node.children(&mut cursor) {
+    // Get the type, storage class, and visibility of the declaration(s).
+    for sub_node in node.named_children(&mut cursor) {
+        match sub_node.kind() {
+            "variable_storage_class" | "variable_visibility" | "type" => {
+                buf.push_str(sub_node.utf8_text(source.as_ref()).unwrap());
+                buf.push(' ');
+            }
+            "variable_declaration" => variable_declarations.push(sub_node),
+            _ => println!("{}", sub_node.kind()),
+        }
+    }
+
+    // Iterate over all declarations of this statement.
+    // Handle cases such as:
+    // `int foo, bar;`
+    for child in variable_declarations {
         if !(child.kind() == "variable_declaration") {
             // TODO: Handle comments and preproc statements here.
             continue;
@@ -68,6 +72,7 @@ fn write_global_variable(node: Node, buf: &mut String, source: &String) {
         }
         buf.push_str(", ");
     }
+
     // Remove the last ", "
     buf.pop();
     buf.pop();

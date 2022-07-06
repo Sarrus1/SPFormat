@@ -8,7 +8,7 @@ crate-type = ["cdylib", "rlib"]
 path = "src/main.rs"
 
 [dependencies]
-tree-sitter-sourcepawn = { path = ".\\tree-sitter-sourcepawn" }
+tree-sitter-sourcepawn = { path = "tree-sitter-sourcepawn" }
 tree-sitter = "0.20.8"
 wasm-bindgen = "0.2.63"
 

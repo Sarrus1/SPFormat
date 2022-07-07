@@ -8,6 +8,7 @@ use wasm_bindgen::prelude::*;
 struct Formatter<'a> {
     output: String,
     source: &'a [u8],
+    initialValue_id: u16,
 }
 
 async fn main() -> Result<(), Utf8Error> {
@@ -35,16 +36,21 @@ pub async fn format_string(input: &String) -> anyhow::Result<String> {
     let mut formatter = Formatter {
         output: String::new(),
         source: input.as_bytes(),
+        initialValue_id: language.field_id_for_name("initialValue").unwrap(),
     };
     for node in parsed.root_node().children(&mut cursor) {
         match node.kind().borrow() {
             "global_variable_declaration" => write_global_variable(node, &mut formatter)?,
             _ => formatter
                 .output
-                .push_str(node.utf8_text(formatter.source)?.borrow()),
+                .push_str(utf8_text(node, formatter.source)?.borrow()),
         };
     }
     Ok(formatter.output)
+}
+
+fn utf8_text<'a>(node: Node, source: &'a [u8]) -> Result<&'a str, Utf8Error> {
+    std::str::from_utf8(&source[(node.start_byte() as usize)..(node.end_byte() as usize)])
 }
 
 fn write_global_variable(node: Node, formatter: &mut Formatter) -> Result<(), Utf8Error> {
@@ -57,7 +63,7 @@ fn write_global_variable(node: Node, formatter: &mut Formatter) -> Result<(), Ut
             "variable_storage_class" | "variable_visibility" | "type" => {
                 formatter
                     .output
-                    .push_str(sub_node.utf8_text(formatter.source)?.borrow());
+                    .push_str(utf8_text(sub_node, formatter.source)?.borrow());
                 formatter.output.push(' ');
             }
             "variable_declaration" => variable_declarations.push(sub_node),
@@ -73,10 +79,7 @@ fn write_global_variable(node: Node, formatter: &mut Formatter) -> Result<(), Ut
             // TODO: Handle comments and preproc statements here.
             continue;
         }
-        let var_name = child
-            .child_by_field_name("name")
-            .unwrap()
-            .utf8_text(formatter.source)?;
+        let var_name = utf8_text(child.child_by_field_name("name").unwrap(), formatter.source)?;
         formatter.output.push_str(var_name.borrow());
 
         let mut cursor = child.walk();
@@ -88,9 +91,8 @@ fn write_global_variable(node: Node, formatter: &mut Formatter) -> Result<(), Ut
                 _ => continue,
             }
         }
-
         // Write the default value of a declaration, if it exists.
-        for sub_child in child.children_by_field_name("initialValue", &mut cursor) {
+        for sub_child in child.children_by_field_id(formatter.initialValue_id, &mut cursor) {
             if sub_child.kind().to_string() == "=" {
                 formatter.output.push_str(" = ");
                 continue;
@@ -363,7 +365,7 @@ fn write_old_type_cast(node: Node, formatter: &mut Formatter) -> Result<(), Utf8
 fn write_old_type(node: Node, formatter: &mut Formatter) -> Result<(), Utf8Error> {
     formatter
         .output
-        .push_str(node.utf8_text(formatter.source)?.borrow());
+        .push_str(utf8_text(node, formatter.source)?.borrow());
     formatter.output.push_str(": ");
     Ok(())
 }
@@ -371,6 +373,6 @@ fn write_old_type(node: Node, formatter: &mut Formatter) -> Result<(), Utf8Error
 fn write_node(node: Node, formatter: &mut Formatter) -> Result<(), Utf8Error> {
     formatter
         .output
-        .push_str(node.utf8_text(formatter.source)?.borrow());
+        .push_str(utf8_text(node, formatter.source)?.borrow());
     Ok(())
 }

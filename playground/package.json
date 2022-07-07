@@ -9,7 +9,9 @@
   },
   "dependencies": {
     "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "react-dom": "^18.0.0",
+    "vite-plugin-static-copy": "^0.6.1",
+    "vite-plugin-wasm": "^1.0.1"
   },
   "devDependencies": {
     "@monaco-editor/react": "^4.4.5",

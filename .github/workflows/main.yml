@@ -31,9 +31,13 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: v0.1.0
-          artifacts: "pck/sp_format_bg.wasm"
+          artifacts: "pkg/sp_format_bg.wasm"
           body: ""
           draft: false
           allowUpdates: true
           prerelease: false
           replacesArtifacts: true
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: playground/dist

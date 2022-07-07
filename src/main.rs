@@ -1,5 +1,8 @@
-use std::{fs, str::Utf8Error};
-use tree_sitter::{Node, Parser};
+mod language;
+mod parser;
+
+use std::{borrow::Borrow, fs, str::Utf8Error};
+use tree_sitter::Node;
 use wasm_bindgen::prelude::*;
 
 struct Formatter<'a> {
@@ -7,36 +10,38 @@ struct Formatter<'a> {
     source: &'a [u8],
 }
 
-fn main() -> Result<(), Utf8Error> {
+async fn main() -> Result<(), Utf8Error> {
     let filename = "test.sp";
     let source =
         fs::read_to_string(filename).expect("Something went wrong while reading the file.");
-    fs::write(filename, format_string(&source)?).expect("Something went wrong writing the file.");
+    fs::write(filename, format_string(&source).await.unwrap())
+        .expect("Something went wrong writing the file.");
     Ok(())
 }
 
 #[wasm_bindgen]
-pub fn sp_format(input: String) -> Result<String, JsValue> {
-    let output =
-        format_string(&input).expect("An error has occured while generating the SourcePawn code.");
+pub async fn sp_format(input: String) -> Result<String, JsValue> {
+    let output = format_string(&input)
+        .await
+        .expect("An error has occured while generating the SourcePawn code.");
     Ok(output)
 }
 
-fn format_string(input: &String) -> Result<String, Utf8Error> {
-    let mut parser = Parser::new();
-    parser
-        .set_language(tree_sitter_sourcepawn::language())
-        .expect("Error loading SourcePawn grammar");
-    let parsed = parser.parse(&input, None).unwrap();
+pub async fn format_string(input: &String) -> anyhow::Result<String> {
+    let language = language::sourcepawn().await.unwrap();
+    let mut parser = parser::sourcepawn(&language)?;
+    let parsed = parser.parse(&input, None)?.unwrap();
     let mut cursor = parsed.walk();
     let mut formatter = Formatter {
         output: String::new(),
         source: input.as_bytes(),
     };
     for node in parsed.root_node().children(&mut cursor) {
-        match node.kind() {
+        match node.kind().borrow() {
             "global_variable_declaration" => write_global_variable(node, &mut formatter)?,
-            _ => formatter.output.push_str(node.utf8_text(formatter.source)?),
+            _ => formatter
+                .output
+                .push_str(node.utf8_text(formatter.source)?.borrow()),
         };
     }
     Ok(formatter.output)
@@ -48,11 +53,11 @@ fn write_global_variable(node: Node, formatter: &mut Formatter) -> Result<(), Ut
 
     // Get the type, storage class, and visibility of the declaration(s).
     for sub_node in node.named_children(&mut cursor) {
-        match sub_node.kind() {
+        match sub_node.kind().borrow() {
             "variable_storage_class" | "variable_visibility" | "type" => {
                 formatter
                     .output
-                    .push_str(sub_node.utf8_text(formatter.source)?);
+                    .push_str(sub_node.utf8_text(formatter.source)?.borrow());
                 formatter.output.push(' ');
             }
             "variable_declaration" => variable_declarations.push(sub_node),
@@ -64,7 +69,7 @@ fn write_global_variable(node: Node, formatter: &mut Formatter) -> Result<(), Ut
     // Handle cases such as:
     // `int foo, bar;`
     for child in variable_declarations {
-        if !(child.kind() == "variable_declaration") {
+        if !(child.kind().to_string() == "variable_declaration") {
             // TODO: Handle comments and preproc statements here.
             continue;
         }
@@ -72,12 +77,12 @@ fn write_global_variable(node: Node, formatter: &mut Formatter) -> Result<(), Ut
             .child_by_field_name("name")
             .unwrap()
             .utf8_text(formatter.source)?;
-        formatter.output.push_str(var_name);
+        formatter.output.push_str(var_name.borrow());
 
         let mut cursor = child.walk();
         // Write the dimensions of a declaration, if they exist.
         for sub_child in child.named_children(&mut cursor) {
-            match sub_child.kind() {
+            match sub_child.kind().borrow() {
                 "fixed_dimension" => write_fixed_dimension(sub_child, formatter)?,
                 "dimension" => write_dimension(formatter),
                 _ => continue,
@@ -86,10 +91,10 @@ fn write_global_variable(node: Node, formatter: &mut Formatter) -> Result<(), Ut
 
         // Write the default value of a declaration, if it exists.
         for sub_child in child.children_by_field_name("initialValue", &mut cursor) {
-            if sub_child.kind() == "=" {
+            if sub_child.kind().to_string() == "=" {
                 formatter.output.push_str(" = ");
                 continue;
-            } else if sub_child.kind() == "dynamic_array" {
+            } else if sub_child.kind().to_string() == "dynamic_array" {
                 write_dynamic_array(sub_child, formatter)?;
                 continue;
             }
@@ -110,7 +115,7 @@ fn write_dynamic_array(node: Node, formatter: &mut Formatter) -> Result<(), Utf8
     formatter.output.push_str("new ");
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
-        match child.kind() {
+        match child.kind().borrow() {
             "type" => write_node(node, formatter)?,
             // TODO: Handle different cases here.
             _ => write_node(node, formatter)?,
@@ -123,7 +128,7 @@ fn write_function_call_arguments(node: Node, formatter: &mut Formatter) -> Resul
     let mut cursor = node.walk();
     formatter.output.push('(');
     for child in node.children(&mut cursor) {
-        match child.kind() {
+        match child.kind().borrow() {
             "(" | ")" => continue,
             "symbol" | "ignore_argument" => write_node(child, formatter)?,
             "named_arg" => write_named_arg(child, formatter)?,
@@ -147,7 +152,7 @@ fn write_named_arg(node: Node, formatter: &mut Formatter) -> Result<(), Utf8Erro
 }
 
 fn write_expression(node: Node, formatter: &mut Formatter) -> Result<(), Utf8Error> {
-    match node.kind() {
+    match node.kind().borrow() {
         "symbol" | "null" | "this" | "int_literal " | "bool_literal" | "char_literal"
         | "float_literal" | "string_literal" => write_node(node, formatter)?,
         "binary_expression" => write_binary_expression(node, formatter)?,
@@ -187,7 +192,7 @@ fn write_assignment_expression(node: Node, formatter: &mut Formatter) -> Result<
     write_node(node.child_by_field_name("operator").unwrap(), formatter)?;
     formatter.output.push(' ');
     let right_node = node.child_by_field_name("right").unwrap();
-    match right_node.kind() {
+    match right_node.kind().borrow() {
         "dynamic_array" => write_dynamic_array(right_node, formatter)?,
         _ => write_expression(right_node, formatter)?,
     }
@@ -196,7 +201,7 @@ fn write_assignment_expression(node: Node, formatter: &mut Formatter) -> Result<
 
 fn write_array_indexed_access(node: Node, formatter: &mut Formatter) -> Result<(), Utf8Error> {
     let array_node = node.child_by_field_name("array").unwrap();
-    match array_node.kind() {
+    match array_node.kind().borrow() {
         "array_indexed_access" => write_array_indexed_access(array_node, formatter)?,
         // TODO: Handle "field_access" here.
         _ => write_node(array_node, formatter)?,
@@ -223,7 +228,7 @@ fn write_new_instance(node: Node, formatter: &mut Formatter) -> Result<(), Utf8E
 
 fn write_function_call(node: Node, formatter: &mut Formatter) -> Result<(), Utf8Error> {
     let function_node = node.child_by_field_name("function").unwrap();
-    match function_node.kind() {
+    match function_node.kind().borrow() {
         "symbol" => write_node(node, formatter)?,
         "field_access" => write_field_access(node, formatter)?,
         _ => println!("Unexpected function node."),
@@ -242,7 +247,7 @@ fn write_parenthesized_expression(node: Node, formatter: &mut Formatter) -> Resu
     // TODO: Check for literals/symbols to remove unneeded parenthesis.
     formatter.output.push('(');
     let expression_node = node.child_by_field_name("expression").unwrap();
-    match expression_node.kind() {
+    match expression_node.kind().borrow() {
         "comma_expression" => write_comma_expression(expression_node, formatter)?,
         _ => write_expression(expression_node, formatter)?,
     }
@@ -261,7 +266,7 @@ fn write_concatenated_string(node: Node, formatter: &mut Formatter) -> Result<()
     write_node(node.child_by_field_name("left").unwrap(), formatter)?;
     formatter.output.push_str(" ... ");
     let right_node = node.child_by_field_name("right").unwrap();
-    match right_node.kind() {
+    match right_node.kind().borrow() {
         "concatenated_string" => write_concatenated_string(right_node, formatter)?,
         _ => write_node(right_node, formatter)?,
     }
@@ -310,7 +315,7 @@ fn write_array_literal(node: Node, formatter: &mut Formatter) -> Result<(), Utf8
     let mut cursor = node.walk();
     formatter.output.push_str("{ ");
     for child in node.children(&mut cursor) {
-        match child.kind() {
+        match child.kind().borrow() {
             "{" | "}" => continue,
             "," => formatter.output.push_str(", "),
             _ => write_expression(child, formatter)?,
@@ -324,7 +329,7 @@ fn write_sizeof_expression(node: Node, formatter: &mut Formatter) -> Result<(), 
     let mut cursor = node.walk();
     formatter.output.push_str("sizeof ");
     for child in node.children_by_field_name("type", &mut cursor) {
-        match child.kind() {
+        match child.kind().borrow() {
             "dimension" => write_dimension(formatter),
             _ => write_expression(child, formatter)?,
         }
@@ -340,7 +345,7 @@ fn write_fixed_dimension(node: Node, formatter: &mut Formatter) -> Result<(), Ut
     let mut cursor = node.walk();
     formatter.output.push('[');
     for child in node.children(&mut cursor) {
-        match child.kind() {
+        match child.kind().borrow() {
             "[" | "]" => continue,
             _ => write_expression(child, formatter)?,
         }
@@ -356,12 +361,16 @@ fn write_old_type_cast(node: Node, formatter: &mut Formatter) -> Result<(), Utf8
 }
 
 fn write_old_type(node: Node, formatter: &mut Formatter) -> Result<(), Utf8Error> {
-    formatter.output.push_str(node.utf8_text(formatter.source)?);
+    formatter
+        .output
+        .push_str(node.utf8_text(formatter.source)?.borrow());
     formatter.output.push_str(": ");
     Ok(())
 }
 
 fn write_node(node: Node, formatter: &mut Formatter) -> Result<(), Utf8Error> {
-    formatter.output.push_str(node.utf8_text(formatter.source)?);
+    formatter
+        .output
+        .push_str(node.utf8_text(formatter.source)?.borrow());
     Ok(())
 }

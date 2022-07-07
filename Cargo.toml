@@ -8,9 +8,15 @@ crate-type = ["cdylib", "rlib"]
 path = "src/main.rs"
 
 [dependencies]
-tree-sitter-sourcepawn = { path = "tree-sitter-sourcepawn" }
-tree-sitter = "0.20.8"
-wasm-bindgen = "0.2.63"
+anyhow = "1.0"
+futures = "0.3"
+thiserror = "1.0"
+js-sys = "0.3.57"
+tree-sitter = { version = "*", package = "tree-sitter-facade" }
+wasm-bindgen = { version = "=0.2.80", features = ["strict-macro"] }
+wasm-bindgen-futures = "0.4"
+web-sys = "0.3.57"
+web-tree-sitter-sys = "*"
 
 [build-dependencies]
 cc = "1.0"

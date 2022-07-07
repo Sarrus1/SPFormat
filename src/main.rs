@@ -229,8 +229,8 @@ fn write_new_instance(node: Node, formatter: &mut Formatter) -> Result<(), Utf8E
 fn write_function_call(node: Node, formatter: &mut Formatter) -> Result<(), Utf8Error> {
     let function_node = node.child_by_field_name("function").unwrap();
     match function_node.kind().borrow() {
-        "symbol" => write_node(node, formatter)?,
-        "field_access" => write_field_access(node, formatter)?,
+        "symbol" => write_node(function_node, formatter)?,
+        "field_access" => write_field_access(function_node, formatter)?,
         _ => println!("Unexpected function node."),
     }
     write_function_call_arguments(node.child_by_field_name("arguments").unwrap(), formatter)?;

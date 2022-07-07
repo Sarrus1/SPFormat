@@ -116,9 +116,9 @@ fn write_dynamic_array(node: Node, formatter: &mut Formatter) -> Result<(), Utf8
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         match child.kind().borrow() {
-            "type" => write_node(node, formatter)?,
+            "type" => write_node(child, formatter)?,
             // TODO: Handle different cases here.
-            _ => write_node(node, formatter)?,
+            _ => write_node(child, formatter)?,
         }
     }
     Ok(())

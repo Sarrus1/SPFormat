@@ -1,42 +1,51 @@
 mod language;
 mod parser;
 
+#[cfg(not(target_arch = "wasm32"))]
 use std::{borrow::Borrow, fs, str::Utf8Error};
-use tree_sitter::Node;
+#[cfg(target_arch = "wasm32")]
+use std::{borrow::Borrow, str::Utf8Error};
+
+use tree_sitter::{Language, Node};
+
+#[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
 struct Formatter<'a> {
     output: String,
     source: &'a [u8],
-    initialValue_id: u16,
+    initialvalue_id: u16,
 }
 
-async fn main() -> Result<(), Utf8Error> {
+#[allow(dead_code)]
+#[cfg(not(target_arch = "wasm32"))]
+fn main() -> Result<(), Utf8Error> {
     let filename = "test.sp";
+    let language = tree_sitter_sourcepawn::language().into();
     let source =
         fs::read_to_string(filename).expect("Something went wrong while reading the file.");
-    fs::write(filename, format_string(&source).await.unwrap())
+    fs::write(filename, format_string(&source, language).unwrap())
         .expect("Something went wrong writing the file.");
     Ok(())
 }
 
+#[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 pub async fn sp_format(input: String) -> Result<String, JsValue> {
-    let output = format_string(&input)
-        .await
+    let language = language::sourcepawn().await.unwrap();
+    let output = format_string(&input, language)
         .expect("An error has occured while generating the SourcePawn code.");
     Ok(output)
 }
 
-pub async fn format_string(input: &String) -> anyhow::Result<String> {
-    let language = language::sourcepawn().await.unwrap();
+fn format_string(input: &String, language: Language) -> anyhow::Result<String> {
     let mut parser = parser::sourcepawn(&language)?;
     let parsed = parser.parse(&input, None)?.unwrap();
     let mut cursor = parsed.walk();
     let mut formatter = Formatter {
         output: String::new(),
         source: input.as_bytes(),
-        initialValue_id: language.field_id_for_name("initialValue").unwrap(),
+        initialvalue_id: language.field_id_for_name("initialValue").unwrap(),
     };
     for node in parsed.root_node().children(&mut cursor) {
         match node.kind().borrow() {
@@ -92,7 +101,7 @@ fn write_global_variable(node: Node, formatter: &mut Formatter) -> Result<(), Ut
             }
         }
         // Write the default value of a declaration, if it exists.
-        for sub_child in child.children_by_field_id(formatter.initialValue_id, &mut cursor) {
+        for sub_child in child.children_by_field_id(formatter.initialvalue_id, &mut cursor) {
             if sub_child.kind().to_string() == "=" {
                 formatter.output.push_str(" = ");
                 continue;

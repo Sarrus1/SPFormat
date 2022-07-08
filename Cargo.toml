@@ -7,6 +7,10 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 path = "src/main.rs"
 
+[[bin]]
+name = "sp_format"
+path = "src/main.rs"
+
 [dependencies]
 anyhow = "1.0"
 futures = "0.3"
@@ -17,6 +21,9 @@ wasm-bindgen = { version = "=0.2.81", features = ["strict-macro"] }
 wasm-bindgen-futures = "0.4"
 web-sys = "0.3.57"
 web-tree-sitter-sys = "*"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tree-sitter-sourcepawn = "0.3.0"
 
 [build-dependencies]
 cc = "1.0"

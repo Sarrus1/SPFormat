@@ -1,4 +1,6 @@
+#[cfg(target_arch = "wasm32")]
 use anyhow::anyhow;
+#[cfg(target_arch = "wasm32")]
 pub async fn sourcepawn() -> anyhow::Result<tree_sitter::Language> {
     use wasm_bindgen::JsCast;
     use wasm_bindgen_futures::JsFuture;
@@ -12,5 +14,3 @@ pub async fn sourcepawn() -> anyhow::Result<tree_sitter::Language> {
     let result = inner.into();
     Ok(result)
 }
-
-pub static ID: &str = "sourcepawn";

@@ -21,20 +21,45 @@ jobs:
         run: cd pkg && npm i && cd .. && cp pkg/sp_format_bg.wasm playground/sp_format_bg.wasm && cp pkg/node_modules/web-tree-sitter/tree-sitter.wasm playground/tree-sitter.wasm
       - name: Setup Playground
         run: cd playground && npm i && npm run build
+      - name: Get version
+        run: echo "PACKAGE_VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)" >> $GITHUB_ENV
       - name: Create Release
         uses: ncipollo/release-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          tag: v0.1.0
+          tag: ${{ env.PACKAGE_VERSION }}
           artifacts: "pkg/sp_format_bg.wasm"
           body: ""
           draft: false
           allowUpdates: true
           prerelease: false
           replacesArtifacts: true
-      - name: Deploy 🚀
+      - name: Deploy pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: playground/dist
+
+  release:
+    name: release ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-pc-windows-gnu
+            archive: zip
+          - target: x86_64-unknown-linux-musl
+            archive: tar.gz tar.xz
+          - target: x86_64-apple-darwin
+            archive: zip
+    steps:
+      - uses: actions/checkout@master
+      - name: Compile and release
+        uses: rust-build/rust-build.action@v1.3.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          RUSTTARGET: ${{ matrix.target }}
+          ARCHIVE_TYPES: ${{ matrix.archive }}

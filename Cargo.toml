@@ -15,7 +15,7 @@ js-sys = "0.3.57"
 tree-sitter = { version = "0.4.2", package = "tree-sitter-facade" }
 wasm-bindgen = { version = "=0.2.81", features = ["strict-macro"] }
 wasm-bindgen-futures = "0.4"
-web-sys = "0.3.57"
+web-sys = "0.3.58"
 web-tree-sitter-sys = "*"
 
 [build-dependencies]

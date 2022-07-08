@@ -4,11 +4,11 @@ mod parser;
 use std::{borrow::Borrow, fs, str::Utf8Error};
 use tree_sitter::Node;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::JsFuture;
 
 struct Formatter<'a> {
     output: String,
     source: &'a [u8],
-    initialValue_id: u16,
 }
 
 async fn main() -> Result<(), Utf8Error> {
@@ -30,13 +30,15 @@ pub async fn sp_format(input: String) -> Result<String, JsValue> {
 
 pub async fn format_string(input: &String) -> anyhow::Result<String> {
     let language = language::sourcepawn().await.unwrap();
+    JsFuture::from(web_tree_sitter_sys::Parser::init())
+        .await
+        .expect("failed to initialize tree-sitter");
     let mut parser = parser::sourcepawn(&language)?;
     let parsed = parser.parse(&input, None)?.unwrap();
     let mut cursor = parsed.walk();
     let mut formatter = Formatter {
         output: String::new(),
         source: input.as_bytes(),
-        initialValue_id: language.field_id_for_name("initialValue").unwrap(),
     };
     for node in parsed.root_node().children(&mut cursor) {
         match node.kind().borrow() {
@@ -92,7 +94,7 @@ fn write_global_variable(node: Node, formatter: &mut Formatter) -> Result<(), Ut
             }
         }
         // Write the default value of a declaration, if it exists.
-        for sub_child in child.children_by_field_id(formatter.initialValue_id, &mut cursor) {
+        for sub_child in child.children_by_field_name("initialValue", &mut cursor) {
             if sub_child.kind().to_string() == "=" {
                 formatter.output.push_str(" = ");
                 continue;

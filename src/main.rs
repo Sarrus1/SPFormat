@@ -14,38 +14,44 @@ use wasm_bindgen::prelude::*;
 struct Formatter<'a> {
     output: String,
     source: &'a [u8],
-    initialvalue_id: u16,
+    language: &'a Language,
 }
 
 #[allow(dead_code)]
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> Result<(), Utf8Error> {
     let filename = "test.sp";
-    let language = tree_sitter_sourcepawn::language().into();
     let source =
         fs::read_to_string(filename).expect("Something went wrong while reading the file.");
-    fs::write(filename, format_string(&source, language).unwrap())
-        .expect("Something went wrong writing the file.");
+    let output = format_string(&source).unwrap();
+    fs::write(filename, output).expect("Something went wrong writing the file.");
     Ok(())
+}
+
+pub fn format_string(input: &String) -> anyhow::Result<String> {
+    let language = tree_sitter_sourcepawn::language().into();
+    let output = format_string_language(&input, language)
+        .expect("An error has occured while generating the SourcePawn code.");
+    Ok(output)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 pub async fn sp_format(input: String) -> Result<String, JsValue> {
     let language = language::sourcepawn().await.unwrap();
-    let output = format_string(&input, language)
+    let output = format_string_language(&input, language)
         .expect("An error has occured while generating the SourcePawn code.");
     Ok(output)
 }
 
-fn format_string(input: &String, language: Language) -> anyhow::Result<String> {
+fn format_string_language(input: &String, language: Language) -> anyhow::Result<String> {
     let mut parser = parser::sourcepawn(&language)?;
     let parsed = parser.parse(&input, None)?.unwrap();
     let mut cursor = parsed.walk();
     let mut formatter = Formatter {
         output: String::new(),
         source: input.as_bytes(),
-        initialvalue_id: language.field_id_for_name("initialValue").unwrap(),
+        language: &language,
     };
     for node in parsed.root_node().children(&mut cursor) {
         match node.kind().borrow() {
@@ -101,7 +107,13 @@ fn write_global_variable(node: Node, formatter: &mut Formatter) -> Result<(), Ut
             }
         }
         // Write the default value of a declaration, if it exists.
-        for sub_child in child.children_by_field_id(formatter.initialvalue_id, &mut cursor) {
+        for sub_child in child.children_by_field_id(
+            formatter
+                .language
+                .field_id_for_name("initialValue")
+                .unwrap(),
+            &mut cursor,
+        ) {
             if sub_child.kind().to_string() == "=" {
                 formatter.output.push_str(" = ");
                 continue;
@@ -339,7 +351,10 @@ fn write_array_literal(node: Node, formatter: &mut Formatter) -> Result<(), Utf8
 fn write_sizeof_expression(node: Node, formatter: &mut Formatter) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
     formatter.output.push_str("sizeof ");
-    for child in node.children_by_field_name("type", &mut cursor) {
+    for child in node.children_by_field_id(
+        formatter.language.field_id_for_name("type").unwrap(),
+        &mut cursor,
+    ) {
         match child.kind().borrow() {
             "dimension" => write_dimension(formatter),
             _ => write_expression(child, formatter)?,

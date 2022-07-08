@@ -22,7 +22,7 @@ jobs:
       - name: Setup Playground
         run: cd playground && npm i && npm run build
       - name: Get version
-        run: echo "PACKAGE_VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)" >> $GITHUB_ENV
+        run: 'echo "PACKAGE_VERSION=$(cargo pkgid | cut -d# -f2 | cut -d: -f2)" >> $GITHUB_ENV'
       - name: Create Release
         uses: ncipollo/release-action@v1
         env:

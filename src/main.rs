@@ -43,21 +43,29 @@ pub async fn sp_format(input: String) -> Result<String, JsValue> {
 fn format_string_language(input: &String, language: Language) -> anyhow::Result<String> {
     let mut parser = parser::sourcepawn(&language)?;
     let parsed = parser.parse(&input, None)?.unwrap();
+    #[cfg(debug_assertions)]
+    println!("{}", parsed.root_node().to_sexp());
     let mut cursor = parsed.walk();
-    let mut formatter = writers::Writer {
+    let mut writer = writers::Writer {
         output: String::new(),
         source: input.as_bytes(),
         language: &language,
         indent: 0,
         indent_string: "\t".to_string(),
+        skip: 0,
     };
     for node in parsed.root_node().children(&mut cursor) {
+        if writer.skip > 0 {
+            writer.skip -= 1;
+            continue;
+        }
         match node.kind().borrow() {
-            "global_variable_declaration" => writers::write_global_variable(node, &mut formatter)?,
-            _ => formatter
+            "global_variable_declaration" => writers::write_global_variable(node, &mut writer)?,
+            "comment" => writers::write_comment(node, &mut writer)?,
+            _ => writer
                 .output
-                .push_str(writers::utf8_text(node, formatter.source)?.borrow()),
+                .push_str(writers::utf8_text(node, writer.source)?.borrow()),
         };
     }
-    Ok(formatter.output)
+    Ok(writer.output)
 }

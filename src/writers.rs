@@ -5,8 +5,9 @@ pub struct Writer<'a> {
     pub output: String,
     pub source: &'a [u8],
     pub language: &'a Language,
-    pub indent: u8,
+    pub indent: usize,
     pub indent_string: String,
+    pub skip: u8,
 }
 
 pub fn utf8_text<'a>(node: Node, source: &'a [u8]) -> Result<&'a str, Utf8Error> {
@@ -15,10 +16,9 @@ pub fn utf8_text<'a>(node: Node, source: &'a [u8]) -> Result<&'a str, Utf8Error>
 
 pub fn write_global_variable(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
-    let mut variable_declarations: Vec<Node> = Vec::new();
+    global_variable_declaration_break(&node, writer)?;
 
-    // Get the type, storage class, and visibility of the declaration(s).
-    for sub_node in node.named_children(&mut cursor) {
+    for sub_node in node.children(&mut cursor) {
         match sub_node.kind().borrow() {
             "variable_storage_class" | "variable_visibility" | "type" => {
                 writer
@@ -26,53 +26,114 @@ pub fn write_global_variable(node: Node, writer: &mut Writer) -> Result<(), Utf8
                     .push_str(utf8_text(sub_node, writer.source)?.borrow());
                 writer.output.push(' ');
             }
-            "variable_declaration" => variable_declarations.push(sub_node),
+            "comment" => {
+                write_comment(sub_node, writer)?;
+            }
+            "variable_declaration" => write_variable_declaration(sub_node, writer)?,
+            "," => writer.output.push_str(", "),
             _ => println!("{}", sub_node.kind()),
         }
     }
+    let next_node = node.next_sibling();
+    if next_node.is_none() {
+        writer.output.push_str(";");
+        return Ok(());
+    }
+    let next_node = next_node.unwrap();
+    if next_node.kind() == "comment" {
+        if next_node.start_position().row() == node.end_position().row() {
+            writer.output.push_str(";\t");
+            write_comment(next_node, writer)?;
+            writer.skip += 1;
+        } else {
+            writer.output.push_str(";\n\n");
+        }
+    } else {
+        writer.output.push_str(";\n");
+    }
+    Ok(())
+}
 
-    // Iterate over all declarations of this statement.
-    // Handle cases such as:
-    // `int foo, bar;`
-    for child in variable_declarations {
-        if !(child.kind().to_string() == "variable_declaration") {
-            // TODO: Handle comments and preproc statements here.
+fn global_variable_declaration_break(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let prev_node = node.prev_sibling();
+
+    if prev_node.is_none() {
+        writer.output.push('\n');
+        return Ok(());
+    }
+    let prev_node = prev_node.unwrap();
+    if prev_node.kind() == "comment"
+        && prev_node.end_position().row() == node.start_position().row() - 1
+    {
+        return Ok(());
+    }
+    if prev_node.kind() != "global_variable_declaration" {
+        writer.output.push('\n');
+        return Ok(());
+    }
+    // Don't double next line if same type.
+    let var_type = utf8_text(node.child_by_field_name("type").unwrap(), writer.source)?.borrow();
+    let prev_var_type = utf8_text(
+        prev_node.child_by_field_name("type").unwrap(),
+        writer.source,
+    )?
+    .borrow();
+
+    if var_type != prev_var_type {
+        writer.output.push('\n');
+        return Ok(());
+    }
+    Ok(())
+}
+
+fn write_variable_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let var_name = utf8_text(node.child_by_field_name("name").unwrap(), writer.source)?;
+    writer.output.push_str(var_name.borrow());
+
+    let mut cursor = node.walk();
+    // Write the dimensions of a declaration, if they exist.
+    for sub_child in node.named_children(&mut cursor) {
+        match sub_child.kind().borrow() {
+            "fixed_dimension" => write_fixed_dimension(sub_child, writer)?,
+            "dimension" => write_dimension(writer),
+            _ => continue,
+        }
+    }
+    // Write the default value of a declaration, if it exists.
+    for sub_child in node.children_by_field_id(
+        writer.language.field_id_for_name("initialValue").unwrap(),
+        &mut cursor,
+    ) {
+        if sub_child.kind().to_string() == "=" {
+            writer.output.push_str(" = ");
+            continue;
+        } else if sub_child.kind().to_string() == "dynamic_array" {
+            write_dynamic_array(sub_child, writer)?;
             continue;
         }
-        let var_name = utf8_text(child.child_by_field_name("name").unwrap(), writer.source)?;
-        writer.output.push_str(var_name.borrow());
-
-        let mut cursor = child.walk();
-        // Write the dimensions of a declaration, if they exist.
-        for sub_child in child.named_children(&mut cursor) {
-            match sub_child.kind().borrow() {
-                "fixed_dimension" => write_fixed_dimension(sub_child, writer)?,
-                "dimension" => write_dimension(writer),
-                _ => continue,
-            }
-        }
-        // Write the default value of a declaration, if it exists.
-        for sub_child in child.children_by_field_id(
-            writer.language.field_id_for_name("initialValue").unwrap(),
-            &mut cursor,
-        ) {
-            if sub_child.kind().to_string() == "=" {
-                writer.output.push_str(" = ");
-                continue;
-            } else if sub_child.kind().to_string() == "dynamic_array" {
-                write_dynamic_array(sub_child, writer)?;
-                continue;
-            }
-            write_expression(sub_child, writer)?;
-            break;
-        }
-        writer.output.push_str(", ");
+        write_expression(sub_child, writer)?;
+        break;
     }
+    Ok(())
+}
 
-    // Remove the last ", "
-    writer.output.pop();
-    writer.output.pop();
-    writer.output.push_str(";\n");
+pub fn write_comment(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let prev_node = node.prev_named_sibling();
+    if !prev_node.is_none() {
+        let prev_node = prev_node.unwrap();
+        match prev_node.kind().borrow() {
+            "comment" => {
+                if node.start_position().row() - 1 > prev_node.end_position().row() {
+                    // Add a single break
+                    writer.output.push('\n');
+                }
+            }
+            _ => {}
+        }
+    }
+    write_node(node, writer)?;
+    writer.output.push('\n');
+
     Ok(())
 }
 

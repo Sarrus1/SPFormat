@@ -193,6 +193,59 @@ fn write_struct_field_value(node: Node, writer: &mut Writer) -> Result<(), Utf8E
     Ok(())
 }
 
+pub fn write_struct(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+    for sub_node in node.children(&mut cursor) {
+        match sub_node.kind().borrow() {
+            "comment" => {
+                writer.output.push('\t');
+                write_comment(sub_node, writer)?;
+            }
+            "struct" => writer.output.push_str("struct "),
+            "symbol" => write_node(sub_node, writer)?,
+            "{" => {
+                writer.indent += 1;
+                writer.output.push_str("\n{\n");
+            }
+            "}" => {
+                writer.indent -= 1;
+                writer.output.push('}');
+            }
+            "struct_field" => write_struct_field(sub_node, writer)?,
+            _ => writer.output.push_str(";\n"),
+        }
+    }
+
+    Ok(())
+}
+
+fn write_struct_field(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    writer
+        .output
+        .push_str(writer.indent_string.repeat(writer.indent).as_str());
+
+    let mut cursor = node.walk();
+    for sub_node in node.children(&mut cursor) {
+        match sub_node.kind().borrow() {
+            "public" => writer.output.push_str("public "),
+            "const" => writer.output.push_str("const "),
+            "type" => write_node(sub_node, writer)?,
+            "symbol" => {
+                writer.output.push(' ');
+                write_node(sub_node, writer)?;
+            }
+            "fixed_dimension" => write_fixed_dimension(sub_node, writer)?,
+            "dimension" => write_dimension(writer),
+            ";" => writer.output.push(';'),
+            _ => {
+                println!("{}", sub_node.kind())
+            }
+        }
+    }
+
+    Ok(())
+}
+
 pub fn write_global_variable(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
     global_variable_declaration_break(&node, writer)?;

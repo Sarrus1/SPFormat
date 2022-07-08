@@ -68,6 +68,7 @@ fn format_string_language(input: &String, language: Language) -> anyhow::Result<
             "preproc_if" | "preproc_endif" | "preproc_else" | "preproc_endinput"
             | "preproc_pragma" => writers::write_preproc_generic(node, &mut writer)?,
             "struct_declaration" => writers::write_struct_declaration(node, &mut writer)?,
+            "struct" => writers::write_struct(node, &mut writer)?,
             "comment" => writers::write_comment(node, &mut writer)?,
             _ => writer
                 .output

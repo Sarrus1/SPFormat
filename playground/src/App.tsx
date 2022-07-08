@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
-import init, { sp_format } from "../../pkg/sp_format";
+import init from "../../pkg/sp_format";
 import Editor from "@monaco-editor/react";
+import Header from "./components/Header";
 import "./App.css";
+import { defaultCode } from "./text";
 
 function App() {
-  const [code, setCode] = useState("// Your code here");
+  const [code, setCode] = useState(defaultCode);
   const editorRef = useRef(null);
 
   function handleEditorDidMount(editor: any, monaco: any) {
@@ -23,15 +25,7 @@ function App() {
 
   return (
     <>
-      <button
-        onClick={(e) => {
-          sp_format(code)
-            .then((res) => setCode(res))
-            .catch((err) => console.log(err));
-        }}
-      >
-        Format Code
-      </button>
+      <Header code={code} setCode={setCode} />
       <Editor
         height="100vh"
         theme="vs-dark"

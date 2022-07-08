@@ -3,8 +3,6 @@ mod parser;
 mod writers;
 
 use std::borrow::Borrow;
-#[cfg(target_arch = "wasm32")]
-use std::{borrow::Borrow, str::Utf8Error};
 #[cfg(not(target_arch = "wasm32"))]
 use std::{fs, str::Utf8Error};
 
@@ -24,6 +22,7 @@ fn main() -> Result<(), Utf8Error> {
     Ok(())
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 pub fn format_string(input: &String) -> anyhow::Result<String> {
     let language = tree_sitter_sourcepawn::language().into();
     let output = format_string_language(&input, language)

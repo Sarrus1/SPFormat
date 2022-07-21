@@ -33,6 +33,7 @@ pub fn format_string(input: &String) -> anyhow::Result<String> {
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
 pub async fn sp_format(input: String) -> Result<String, JsValue> {
+    tree_sitter::TreeSitter::init().await?;
     let language = language::sourcepawn().await.unwrap();
     let output = format_string_language(&input, language)
         .expect("An error has occured while generating the SourcePawn code.");

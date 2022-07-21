@@ -284,11 +284,10 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-facade"
-version = "0.4.2"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e4ef2c4e351857c1639e0880bb1691e6777227eb00815e69961668dab3303923"
+checksum = "b44e6891c6ead45559fbc28372517553ad40adba80adcba6ca7c960177a8df83"
 dependencies = [
- "anyhow",
  "js-sys",
  "tree-sitter",
  "wasm-bindgen",
@@ -414,11 +413,11 @@ dependencies = [
 
 [[package]]
 name = "web-tree-sitter-sys"
-version = "0.6.2"
+version = "1.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc99ad4ddae633ac4a63cb2d3e3efbcc8b6fc3613f0bcd3c14d86f50cc815d7b"
+checksum = "ab32acd9a6c3f5d9044c125b7fd173f87d019b8853fe6a424f438c9349601b26"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
- "web-sys",
+ "wasm-bindgen-futures",
 ]

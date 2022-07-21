@@ -332,10 +332,7 @@ fn write_variable_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf
         }
     }
     // Write the default value of a declaration, if it exists.
-    for sub_child in node.children_by_field_id(
-        writer.language.field_id_for_name("initialValue").unwrap(),
-        &mut cursor,
-    ) {
+    for sub_child in node.children_by_field_name("initialValue", &mut cursor) {
         if sub_child.kind().to_string() == "=" {
             writer.output.push_str(" = ");
             continue;
@@ -586,10 +583,7 @@ fn write_array_literal(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
 fn write_sizeof_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
     writer.output.push_str("sizeof ");
-    for child in node.children_by_field_id(
-        writer.language.field_id_for_name("type").unwrap(),
-        &mut cursor,
-    ) {
+    for child in node.children_by_field_name("type", &mut cursor) {
         match child.kind().borrow() {
             "dimension" => write_dimension(writer),
             _ => write_expression(child, writer)?,

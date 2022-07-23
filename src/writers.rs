@@ -1,4 +1,4 @@
-use std::{borrow::Borrow, str::Utf8Error};
+use std::{borrow::Borrow, ops::Deref, str::Utf8Error};
 use tree_sitter::{Language, Node};
 
 pub struct Writer<'a> {
@@ -36,6 +36,7 @@ pub fn write_preproc_include(node: Node, writer: &mut Writer) -> Result<(), Utf8
     if !writer.output.ends_with('\n') {
         writer.output.push('\n');
     }
+
     Ok(())
 }
 
@@ -60,6 +61,7 @@ pub fn write_preproc_define(node: Node, writer: &mut Writer) -> Result<(), Utf8E
     if !writer.output.ends_with('\n') {
         writer.output.push('\n');
     }
+
     Ok(())
 }
 
@@ -80,6 +82,7 @@ pub fn write_preproc_undefine(node: Node, writer: &mut Writer) -> Result<(), Utf
     if !writer.output.ends_with('\n') {
         writer.output.push('\n');
     }
+
     Ok(())
 }
 
@@ -105,6 +108,7 @@ pub fn write_preproc_generic(node: Node, writer: &mut Writer) -> Result<(), Utf8
     if !writer.output.ends_with('\n') {
         writer.output.push('\n');
     }
+
     Ok(())
 }
 
@@ -128,6 +132,7 @@ pub fn write_struct_declaration(node: Node, writer: &mut Writer) -> Result<(), U
             "\n" | _ => {}
         }
     }
+
     Ok(())
 }
 
@@ -283,6 +288,7 @@ pub fn write_global_variable(node: Node, writer: &mut Writer) -> Result<(), Utf8
     } else {
         writer.output.push_str(";\n");
     }
+
     Ok(())
 }
 
@@ -315,6 +321,7 @@ fn global_variable_declaration_break(node: &Node, writer: &mut Writer) -> Result
         writer.output.push('\n');
         return Ok(());
     }
+
     Ok(())
 }
 
@@ -343,6 +350,7 @@ fn write_variable_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf
         write_expression(sub_child, writer)?;
         break;
     }
+
     Ok(())
 }
 
@@ -376,6 +384,7 @@ fn write_dynamic_array(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
             _ => write_node(child, writer)?,
         }
     }
+
     Ok(())
 }
 
@@ -394,6 +403,7 @@ fn write_function_call_arguments(node: Node, writer: &mut Writer) -> Result<(), 
     writer.output.pop();
     writer.output.pop();
     writer.output.push(')');
+
     Ok(())
 }
 
@@ -403,6 +413,7 @@ fn write_named_arg(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     writer.output.push_str(" = ");
     // FIXME: Always write_node.
     write_node(node.child_by_field_name("value").unwrap(), writer)?;
+
     Ok(())
 }
 
@@ -429,6 +440,7 @@ fn write_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
         "sizeof_expression" => write_sizeof_expression(node, writer)?,
         _ => write_node(node, writer)?,
     };
+
     Ok(())
 }
 
@@ -438,6 +450,7 @@ fn write_binary_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Er
     write_node(node.child_by_field_name("operator").unwrap(), writer)?;
     writer.output.push(' ');
     write_expression(node.child_by_field_name("right").unwrap(), writer)?;
+
     Ok(())
 }
 
@@ -451,6 +464,7 @@ fn write_assignment_expression(node: Node, writer: &mut Writer) -> Result<(), Ut
         "dynamic_array" => write_dynamic_array(right_node, writer)?,
         _ => write_expression(right_node, writer)?,
     }
+
     Ok(())
 }
 
@@ -464,6 +478,7 @@ fn write_array_indexed_access(node: Node, writer: &mut Writer) -> Result<(), Utf
     writer.output.push('[');
     write_expression(node.child_by_field_name("index").unwrap(), writer)?;
     writer.output.push(']');
+
     Ok(())
 }
 
@@ -471,6 +486,7 @@ fn write_field_access(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
     write_expression(node.child_by_field_name("target").unwrap(), writer)?;
     writer.output.push('.');
     write_node(node.child_by_field_name("field").unwrap(), writer)?;
+
     Ok(())
 }
 
@@ -478,6 +494,7 @@ fn write_new_instance(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
     writer.output.push_str("new ");
     write_node(node.child_by_field_name("class").unwrap(), writer)?;
     write_function_call_arguments(node.child_by_field_name("arguments").unwrap(), writer)?;
+
     Ok(())
 }
 
@@ -489,12 +506,14 @@ fn write_function_call(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
         _ => println!("Unexpected function node."),
     }
     write_function_call_arguments(node.child_by_field_name("arguments").unwrap(), writer)?;
+
     Ok(())
 }
 
 fn write_unary_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     write_node(node.child_by_field_name("operator").unwrap(), writer)?;
     write_expression(node.child_by_field_name("argument").unwrap(), writer)?;
+
     Ok(())
 }
 
@@ -507,6 +526,7 @@ fn write_parenthesized_expression(node: Node, writer: &mut Writer) -> Result<(),
         _ => write_expression(expression_node, writer)?,
     }
     writer.output.push(')');
+
     Ok(())
 }
 
@@ -514,6 +534,7 @@ fn write_comma_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Err
     write_expression(node.child_by_field_name("left").unwrap(), writer)?;
     writer.output.push_str(", ");
     write_expression(node.child_by_field_name("right").unwrap(), writer)?;
+
     Ok(())
 }
 
@@ -525,6 +546,7 @@ fn write_concatenated_string(node: Node, writer: &mut Writer) -> Result<(), Utf8
         "concatenated_string" => write_concatenated_string(right_node, writer)?,
         _ => write_node(right_node, writer)?,
     }
+
     Ok(())
 }
 
@@ -538,6 +560,7 @@ fn write_update_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Er
         write_expression(argument_node, writer)?;
         write_node(operator_node, writer)?;
     }
+
     Ok(())
 }
 
@@ -547,6 +570,7 @@ fn write_ternary_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8E
     write_expression(node.child_by_field_name("consequence").unwrap(), writer)?;
     writer.output.push_str(" : ");
     write_expression(node.child_by_field_name("alternative").unwrap(), writer)?;
+
     Ok(())
 }
 
@@ -554,6 +578,7 @@ fn write_scope_access(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
     write_expression(node.child_by_field_name("scope").unwrap(), writer)?;
     writer.output.push_str("::");
     write_expression(node.child_by_field_name("field").unwrap(), writer)?;
+
     Ok(())
 }
 
@@ -563,6 +588,7 @@ fn write_view_as(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     writer.output.push_str(">(");
     write_expression(node.child_by_field_name("value").unwrap(), writer)?;
     writer.output.push(')');
+
     Ok(())
 }
 
@@ -577,6 +603,7 @@ fn write_array_literal(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
         }
     }
     writer.output.push_str(" }");
+
     Ok(())
 }
 
@@ -589,6 +616,7 @@ fn write_sizeof_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Er
             _ => write_expression(child, writer)?,
         }
     }
+
     Ok(())
 }
 
@@ -606,12 +634,14 @@ fn write_fixed_dimension(node: Node, writer: &mut Writer) -> Result<(), Utf8Erro
         }
     }
     writer.output.push(']');
+
     Ok(())
 }
 
 fn write_old_type_cast(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     write_old_type(node.child_by_field_name("type").unwrap(), writer)?;
     write_expression(node.child_by_field_name("value").unwrap(), writer)?;
+
     Ok(())
 }
 
@@ -620,6 +650,135 @@ fn write_old_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
         .output
         .push_str(utf8_text(node, writer.source)?.borrow());
     writer.output.push_str(": ");
+
+    Ok(())
+}
+
+pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+
+    for child in node.children(&mut cursor) {
+        match child.kind().borrow() {
+            "function_visibility" => write_function_visibility(child, writer)?,
+            "type" => {
+                let next_kind = next_sibling_kind(&child);
+                write_node(child, writer)?;
+                if next_kind != "dimension" {
+                    writer.output.push(' ')
+                };
+            }
+            "dimension" => {
+                let next_kind = next_sibling_kind(&child);
+                write_dimension(writer);
+                if next_kind != "dimension" {
+                    writer.output.push(' ')
+                };
+            }
+            "argument_declarations" => write_argument_declarations(child, writer)?,
+            "symbol" => write_node(child, writer)?,
+            _ => write_node(child, writer)?,
+        }
+    }
+
+    Ok(())
+}
+
+fn write_argument_declarations(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+
+    for child in node.children(&mut cursor) {
+        match child.kind().borrow() {
+            "(" => write_node(child, writer)?,
+            ")" => write_node(child, writer)?,
+            "rest_argument" => {
+                let mut sub_cursor = child.walk();
+                for sub_child in child.children(&mut sub_cursor) {
+                    match sub_child.kind().borrow() {
+                        "type" => write_node(sub_child, writer)?,
+                        "old_type" => write_old_type(sub_child, writer)?,
+                        _ => write_node(sub_child, writer)?,
+                    }
+                }
+            }
+            "argument_declaration" => write_argument_declaration(child, writer)?,
+            "," => writer.output.push_str(", "),
+            _ => write_node(child, writer)?,
+        }
+    }
+
+    Ok(())
+}
+
+fn write_argument_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+
+    for child in node.children(&mut cursor) {
+        match child.kind().borrow() {
+            "const" => writer.output.push_str("const "),
+            "argument_type" => write_argument_type(child, writer)?,
+            "symbol" => write_node(child, writer)?,
+            "dimension" => {
+                let next_kind = next_sibling_kind(&child);
+                write_dimension(writer);
+                if next_kind != "dimension" || next_kind != "fixed_dimension" {
+                    writer.output.push(' ')
+                };
+            }
+            "fixed_dimension" => {
+                let next_kind = next_sibling_kind(&child);
+                write_fixed_dimension(child, writer)?;
+                if next_kind != "dimension" || next_kind != "fixed_dimension" {
+                    writer.output.push(' ')
+                };
+            }
+            "=" => writer.output.push_str(" = "),
+            _ => write_expression(child, writer)?,
+        }
+    }
+
+    Ok(())
+}
+
+fn write_argument_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+
+    for child in node.children(&mut cursor) {
+        match child.kind().borrow() {
+            "&" => {
+                let next_kind = next_sibling_kind(&child);
+                writer.output.push('&');
+                if next_kind != "old_type" && next_kind != "" {
+                    writer.output.push(' ')
+                };
+            }
+            "type" => {
+                let next_kind = next_sibling_kind(&child);
+                write_node(child, writer)?;
+                if next_kind != "dimension" {
+                    writer.output.push(' ')
+                };
+            }
+            "dimension" => {
+                let next_kind = next_sibling_kind(&child);
+                write_dimension(writer);
+                if next_kind != "dimension" {
+                    writer.output.push(' ')
+                };
+            }
+            _ => write_node(child, writer)?,
+        }
+    }
+
+    Ok(())
+}
+
+fn write_function_visibility(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+    for child in node.children(&mut cursor) {
+        write_node(child, writer)?;
+        writer.output.push(' ');
+    }
+
     Ok(())
 }
 
@@ -627,6 +786,7 @@ fn write_node(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     writer
         .output
         .push_str(utf8_text(node, writer.source)?.borrow());
+
     Ok(())
 }
 
@@ -634,5 +794,14 @@ fn write_preproc_arg(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     writer
         .output
         .push_str(utf8_text(node, writer.source)?.borrow().trim());
+
     Ok(())
+}
+
+fn next_sibling_kind(node: &Node) -> String {
+    let next_node = node.next_sibling();
+    if next_node.is_none() {
+        return String::from("");
+    }
+    return String::from(next_node.unwrap().kind());
 }

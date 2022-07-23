@@ -75,7 +75,7 @@ fn format_string_language(input: &String, language: Language) -> anyhow::Result<
             "function_definition" => writers::write_function_definition(node, &mut writer)?,
             _ => writer
                 .output
-                .push_str(writers::utf8_text(node, writer.source)?.borrow()),
+                .push_str(node.utf8_text(writer.source)?.borrow()),
         };
     }
     Ok(writer.output)

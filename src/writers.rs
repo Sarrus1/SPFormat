@@ -1,4 +1,4 @@
-use std::{borrow::Borrow, ops::Deref, str::Utf8Error};
+use std::{borrow::Borrow, str::Utf8Error};
 use tree_sitter::{Language, Node};
 
 pub struct Writer<'a> {
@@ -10,10 +10,6 @@ pub struct Writer<'a> {
     pub skip: u8,
 }
 
-pub fn utf8_text<'a>(node: Node, source: &'a [u8]) -> Result<&'a str, Utf8Error> {
-    std::str::from_utf8(&source[(node.start_byte() as usize)..(node.end_byte() as usize)])
-}
-
 pub fn write_preproc_include(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
 
@@ -22,7 +18,7 @@ pub fn write_preproc_include(node: Node, writer: &mut Writer) -> Result<(), Utf8
             "string_literal" | "system_lib_string" => {
                 writer
                     .output
-                    .push_str(utf8_text(sub_node, writer.source)?.borrow());
+                    .push_str(sub_node.utf8_text(writer.source)?.borrow());
             }
             "comment" => {
                 writer.output.push('\t');
@@ -260,7 +256,7 @@ pub fn write_global_variable(node: Node, writer: &mut Writer) -> Result<(), Utf8
             "variable_storage_class" | "variable_visibility" | "type" => {
                 writer
                     .output
-                    .push_str(utf8_text(sub_node, writer.source)?.borrow());
+                    .push_str(sub_node.utf8_text(writer.source)?.borrow());
                 writer.output.push(' ');
             }
             "comment" => {
@@ -310,12 +306,14 @@ fn global_variable_declaration_break(node: &Node, writer: &mut Writer) -> Result
         return Ok(());
     }
     // Don't double next line if same type.
-    let var_type = utf8_text(node.child_by_field_name("type").unwrap(), writer.source)?.borrow();
-    let prev_var_type = utf8_text(
-        prev_node.child_by_field_name("type").unwrap(),
-        writer.source,
-    )?
-    .borrow();
+    let var_type = node
+        .child_by_field_name("type")
+        .unwrap()
+        .utf8_text(writer.source)?;
+    let prev_var_type = prev_node
+        .child_by_field_name("type")
+        .unwrap()
+        .utf8_text(writer.source)?;
 
     if var_type != prev_var_type {
         writer.output.push('\n');
@@ -326,7 +324,10 @@ fn global_variable_declaration_break(node: &Node, writer: &mut Writer) -> Result
 }
 
 fn write_variable_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    let var_name = utf8_text(node.child_by_field_name("name").unwrap(), writer.source)?;
+    let var_name = node
+        .child_by_field_name("name")
+        .unwrap()
+        .utf8_text(writer.source)?;
     writer.output.push_str(var_name.borrow());
 
     let mut cursor = node.walk();
@@ -648,7 +649,7 @@ fn write_old_type_cast(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
 fn write_old_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     writer
         .output
-        .push_str(utf8_text(node, writer.source)?.borrow());
+        .push_str(node.utf8_text(writer.source)?.borrow());
     writer.output.push_str(": ");
 
     Ok(())
@@ -813,15 +814,14 @@ fn write_function_visibility(node: Node, writer: &mut Writer) -> Result<(), Utf8
 fn write_node(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     writer
         .output
-        .push_str(utf8_text(node, writer.source)?.borrow());
+        .push_str(node.utf8_text(writer.source)?.borrow());
 
     Ok(())
 }
 
 fn write_preproc_arg(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    writer
-        .output
-        .push_str(utf8_text(node, writer.source)?.borrow().trim());
+    let args = node.utf8_text(writer.source)?;
+    writer.output.push_str(args.trim());
 
     Ok(())
 }

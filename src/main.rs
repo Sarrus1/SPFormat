@@ -72,6 +72,7 @@ fn format_string_language(input: &String, language: Language) -> anyhow::Result<
             "struct" => writers::write_struct(node, &mut writer)?,
             "comment" => writers::write_comment(node, &mut writer)?,
             "function_declaration" => writers::write_function_declaration(node, &mut writer)?,
+            "function_definition" => writers::write_function_definition(node, &mut writer)?,
             _ => writer
                 .output
                 .push_str(writers::utf8_text(node, writer.source)?.borrow()),

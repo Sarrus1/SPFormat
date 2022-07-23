@@ -683,13 +683,41 @@ pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(),
     Ok(())
 }
 
+pub fn write_function_definition(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+
+    for child in node.children(&mut cursor) {
+        match child.kind().borrow() {
+            "function_definition_type" => write_function_visibility(child, writer)?,
+            "type" => {
+                let next_kind = next_sibling_kind(&child);
+                write_node(child, writer)?;
+                if next_kind != "dimension" {
+                    writer.output.push(' ')
+                };
+            }
+            "dimension" => {
+                let next_kind = next_sibling_kind(&child);
+                write_dimension(writer);
+                if next_kind != "dimension" {
+                    writer.output.push(' ')
+                };
+            }
+            "argument_declarations" => write_argument_declarations(child, writer)?,
+            "symbol" => write_node(child, writer)?,
+            _ => write_node(child, writer)?,
+        }
+    }
+
+    Ok(())
+}
+
 fn write_argument_declarations(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
 
     for child in node.children(&mut cursor) {
         match child.kind().borrow() {
-            "(" => write_node(child, writer)?,
-            ")" => write_node(child, writer)?,
+            "(" | ")" => write_node(child, writer)?,
             "rest_argument" => {
                 let mut sub_cursor = child.walk();
                 for sub_child in child.children(&mut sub_cursor) {

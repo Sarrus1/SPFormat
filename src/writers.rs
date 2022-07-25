@@ -236,7 +236,7 @@ fn write_struct_field(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
                 write_node(sub_node, writer)?;
             }
             "fixed_dimension" => write_fixed_dimension(sub_node, writer)?,
-            "dimension" => write_dimension(writer),
+            "dimension" => write_dimension(sub_node, writer)?,
             ";" => writer.output.push(';'),
             _ => {
                 println!("{}", sub_node.kind())
@@ -323,6 +323,54 @@ fn global_variable_declaration_break(node: &Node, writer: &mut Writer) -> Result
     Ok(())
 }
 
+fn write_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let next_kind = next_sibling_kind(&node);
+
+    write_node(node, writer)?;
+    if next_kind != "dimension" {
+        writer.output.push(' ')
+    };
+
+    Ok(())
+}
+
+fn write_variable_declaration_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+
+    for child in node.children(&mut cursor) {
+        match child.kind().borrow() {
+            "variable_storage_class" => write_variable_storage_class(child, writer)?,
+            "type" => write_type(child, writer)?,
+            "dimension" => write_dimension(child, writer)?,
+            "variable_declaration" => write_variable_declaration(child, writer)?,
+            "comment" => write_comment(child, writer)?,
+            _ => write_node(child, writer)?,
+        }
+    }
+
+    if !writer.output.ends_with(';') {
+        writer.output.push_str(";\n");
+    }
+
+    Ok(())
+}
+
+fn write_variable_storage_class(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+
+    for sub_node in node.children(&mut cursor) {
+        match sub_node.kind().borrow() {
+            "const" | "static" => {
+                write_node(sub_node, writer)?;
+                writer.output.push(' ');
+            }
+            _ => write_node(sub_node, writer)?,
+        }
+    }
+
+    Ok(())
+}
+
 fn write_variable_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let var_name = node
         .child_by_field_name("name")
@@ -335,7 +383,7 @@ fn write_variable_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf
     for sub_child in node.named_children(&mut cursor) {
         match sub_child.kind().borrow() {
             "fixed_dimension" => write_fixed_dimension(sub_child, writer)?,
-            "dimension" => write_dimension(writer),
+            "dimension" => write_dimension(sub_child, writer)?,
             _ => continue,
         }
     }
@@ -613,7 +661,7 @@ fn write_sizeof_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Er
     writer.output.push_str("sizeof ");
     for child in node.children_by_field_name("type", &mut cursor) {
         match child.kind().borrow() {
-            "dimension" => write_dimension(writer),
+            "dimension" => write_dimension(child, writer)?,
             _ => write_expression(child, writer)?,
         }
     }
@@ -621,8 +669,14 @@ fn write_sizeof_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Er
     Ok(())
 }
 
-fn write_dimension(writer: &mut Writer) {
+fn write_dimension(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let next_kind = next_sibling_kind(&node);
     writer.output.push_str("[]");
+    if next_kind != "dimension" || next_kind != "fixed_dimension" {
+        writer.output.push(' ')
+    };
+
+    Ok(())
 }
 
 fn write_fixed_dimension(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
@@ -661,23 +715,12 @@ pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(),
     for child in node.children(&mut cursor) {
         match child.kind().borrow() {
             "function_visibility" => write_function_visibility(child, writer)?,
-            "type" => {
-                let next_kind = next_sibling_kind(&child);
-                write_node(child, writer)?;
-                if next_kind != "dimension" {
-                    writer.output.push(' ')
-                };
-            }
-            "dimension" => {
-                let next_kind = next_sibling_kind(&child);
-                write_dimension(writer);
-                if next_kind != "dimension" {
-                    writer.output.push(' ')
-                };
-            }
+            "type" => write_type(child, writer)?,
+            "dimension" => write_dimension(child, writer)?,
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "symbol" => write_node(child, writer)?,
-            _ => write_node(child, writer)?,
+            "block" => write_block(child, writer)?,
+            _ => write_statement(child, writer)?,
         }
     }
 
@@ -690,20 +733,8 @@ pub fn write_function_definition(node: Node, writer: &mut Writer) -> Result<(), 
     for child in node.children(&mut cursor) {
         match child.kind().borrow() {
             "function_definition_type" => write_function_visibility(child, writer)?,
-            "type" => {
-                let next_kind = next_sibling_kind(&child);
-                write_node(child, writer)?;
-                if next_kind != "dimension" {
-                    writer.output.push(' ')
-                };
-            }
-            "dimension" => {
-                let next_kind = next_sibling_kind(&child);
-                write_dimension(writer);
-                if next_kind != "dimension" {
-                    writer.output.push(' ')
-                };
-            }
+            "type" => write_type(child, writer)?,
+            "dimension" => write_dimension(child, writer)?,
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "symbol" => write_node(child, writer)?,
             _ => write_node(child, writer)?,
@@ -746,13 +777,7 @@ fn write_argument_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf
             "const" => writer.output.push_str("const "),
             "argument_type" => write_argument_type(child, writer)?,
             "symbol" => write_node(child, writer)?,
-            "dimension" => {
-                let next_kind = next_sibling_kind(&child);
-                write_dimension(writer);
-                if next_kind != "dimension" || next_kind != "fixed_dimension" {
-                    writer.output.push(' ')
-                };
-            }
+            "dimension" => write_dimension(child, writer)?,
             "fixed_dimension" => {
                 let next_kind = next_sibling_kind(&child);
                 write_fixed_dimension(child, writer)?;
@@ -780,20 +805,8 @@ fn write_argument_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
                     writer.output.push(' ')
                 };
             }
-            "type" => {
-                let next_kind = next_sibling_kind(&child);
-                write_node(child, writer)?;
-                if next_kind != "dimension" {
-                    writer.output.push(' ')
-                };
-            }
-            "dimension" => {
-                let next_kind = next_sibling_kind(&child);
-                write_dimension(writer);
-                if next_kind != "dimension" {
-                    writer.output.push(' ')
-                };
-            }
+            "type" => write_type(child, writer)?,
+            "dimension" => write_dimension(child, writer)?,
             _ => write_node(child, writer)?,
         }
     }
@@ -806,6 +819,27 @@ fn write_function_visibility(node: Node, writer: &mut Writer) -> Result<(), Utf8
     for child in node.children(&mut cursor) {
         write_node(child, writer)?;
         writer.output.push(' ');
+    }
+
+    Ok(())
+}
+
+fn write_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    match node.kind().borrow() {
+        "block" => write_block(node, writer)?,
+        "variable_declaration_statement" => write_variable_declaration_statement(node, writer)?,
+        _ => write_node(node, writer)?,
+    }
+    Ok(())
+}
+
+fn write_block(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+    for child in node.children(&mut cursor) {
+        match child.kind().borrow() {
+            "{" | "}" => write_node(child, writer)?,
+            _ => write_statement(child, writer)?,
+        }
     }
 
     Ok(())

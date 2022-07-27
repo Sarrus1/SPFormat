@@ -5,6 +5,7 @@ mod writers;
 use std::borrow::Borrow;
 #[cfg(not(target_arch = "wasm32"))]
 use std::{fs, str::Utf8Error};
+use std::env;
 
 use tree_sitter::Language;
 
@@ -14,7 +15,9 @@ use wasm_bindgen::prelude::*;
 #[allow(dead_code)]
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> Result<(), Utf8Error> {
-    let filename = "test.sp";
+    let args: Vec<String> = env::args().collect();
+
+    let filename = &args[1];
     let source =
         fs::read_to_string(filename).expect("Something went wrong while reading the file.");
     let output = format_string(&source).unwrap();

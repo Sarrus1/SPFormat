@@ -1,6 +1,8 @@
 void OnPluginStart()
 {
-	for(i = 0, j = 0; i <= MaxClients; i++)
+	do
 	{
+		int foo = 0;
 	}
+	while(true)
 }

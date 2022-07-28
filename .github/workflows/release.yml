@@ -24,7 +24,7 @@ jobs:
         run: |
           tmp=$(cargo pkgid)
           tmp=$(${a#*@})
-          'echo "PACKAGE_VERSION=$(${tmp})" >> $GITHUB_ENV'
+          'echo "PACKAGE_VERSION=${tmp}" >> $GITHUB_ENV'
       - name: Create Release
         uses: ncipollo/release-action@v1
         env:

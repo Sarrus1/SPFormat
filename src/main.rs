@@ -13,6 +13,7 @@ use tree_sitter::Language;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
+#[cfg(not(target_arch = "wasm32"))]
 /// A tool to format SourcePawn code (new AND old syntaxes).
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]

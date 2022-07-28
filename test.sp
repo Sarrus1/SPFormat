@@ -1,5 +1,6 @@
 void OnPluginStart()
 {
-	new String: foo = "", bar = "d";
-	int foo;
+	for(i = 0, j = 0; i <= MaxClients; i++)
+	{
+	}
 }

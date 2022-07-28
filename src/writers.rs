@@ -1,4 +1,4 @@
-use std::{borrow::Borrow, str::Utf8Error};
+use std::{borrow::Borrow, collections::HashSet, str::Utf8Error};
 use tree_sitter::{Language, Node};
 
 pub struct Writer<'a> {
@@ -8,12 +8,27 @@ pub struct Writer<'a> {
     pub indent: usize,
     pub indent_string: String,
     pub skip: u8,
+    pub _statement_kinds: HashSet<String>,
+    pub _expression_kinds: HashSet<String>,
+    pub _literal_kinds: HashSet<String>,
 }
 
 impl Writer<'_> {
     fn write_indent(&mut self) {
         self.output
             .push_str(self.indent_string.repeat(self.indent).as_str());
+    }
+
+    fn is_statement(&mut self, kind: String) -> bool {
+        return self._statement_kinds.contains(&kind);
+    }
+
+    fn is_expression(&mut self, kind: String) -> bool {
+        return self._expression_kinds.contains(&kind) || self.is_literal(kind);
+    }
+
+    fn is_literal(&mut self, kind: String) -> bool {
+        return self._literal_kinds.contains(&kind);
     }
 }
 
@@ -916,8 +931,53 @@ fn write_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
         "old_variable_declaration_statement" => {
             write_old_variable_declaration_statement(node, writer, false)?
         }
+        "for_loop" => write_for_loop(node, writer)?,
         _ => write_node(node, writer)?,
     }
+    Ok(())
+}
+
+fn write_for_loop(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+    for child in node.children(&mut cursor) {
+        let kind = child.kind();
+        match kind.borrow() {
+            "for" => {
+                writer.write_indent();
+                write_node(child, writer)?;
+            }
+            "(" => write_node(child, writer)?,
+            ")" => {
+                write_node(child, writer)?;
+                writer.output.push('\n')
+            }
+            "variable_declaration_statement" => {
+                write_variable_declaration_statement(child, writer, true)?
+            }
+            "old_variable_declaration_statement" => {
+                write_old_variable_declaration_statement(child, writer, true)?
+            }
+            "assignment_expression" => write_assignment_expression(child, writer)?,
+            ";" => writer.output.push(';'),
+            "," => writer.output.push_str(", "),
+            _ => {
+                if writer.is_statement(kind.to_string()) {
+                    if writer.output.ends_with(';') {
+                        writer.output.push(' ');
+                    }
+                    write_statement(child, writer)?;
+                } else if writer.is_expression(kind.to_string()) {
+                    if writer.output.ends_with(';') {
+                        writer.output.push(' ');
+                    }
+                    write_expression(child, writer)?;
+                } else {
+                    write_node(child, writer)?;
+                }
+            }
+        }
+    }
+
     Ok(())
 }
 
@@ -932,9 +992,10 @@ fn write_block(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
                 writer.indent += 1;
             }
             "}" => {
+                writer.indent -= 1;
                 writer.write_indent();
                 write_node(child, writer)?;
-                writer.indent -= 1;
+                writer.output.push('\n');
             }
             _ => write_statement(child, writer)?,
         }

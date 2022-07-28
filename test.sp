@@ -1,8 +1,15 @@
 void OnPluginStart()
 {
-	do
+	if(true)
 	{
-		int foo = 0;
+		int foo;
 	}
-	while(true)
+	else if(true)
+	{
+		int bar;
+	}
+	else
+	{
+		int baz;
+	}
 }

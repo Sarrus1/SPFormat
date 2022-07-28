@@ -934,6 +934,17 @@ fn write_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
         "for_loop" => write_for_loop(node, writer)?,
         "while_loop" => write_while_loop(node, writer)?,
         "do_while_loop" => write_do_while_loop(node, writer)?,
+        "break_statement" => {
+            writer.write_indent();
+            writer.output.push_str("break");
+            writer.output.push_str(";\n");
+        }
+        "continue_statement" => {
+            writer.write_indent();
+            writer.output.push_str("continue");
+            writer.output.push_str(";\n");
+        }
+        "condition_statement" => write_condition_statement(node, writer)?,
         _ => write_node(node, writer)?,
     }
     Ok(())
@@ -1031,6 +1042,53 @@ fn write_do_while_loop(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
             "while" => {
                 writer.write_indent();
                 write_node(child, writer)?;
+            }
+            "(" => write_node(child, writer)?,
+            ")" => {
+                write_node(child, writer)?;
+                writer.output.push('\n')
+            }
+            _ => {
+                if writer.is_statement(kind.to_string()) {
+                    if writer.output.ends_with(';') {
+                        writer.output.push(' ');
+                    }
+                    write_statement(child, writer)?;
+                } else if writer.is_expression(kind.to_string()) {
+                    if writer.output.ends_with(';') {
+                        writer.output.push(' ');
+                    }
+                    write_expression(child, writer)?;
+                } else {
+                    write_node(child, writer)?;
+                }
+            }
+        }
+    }
+
+    Ok(())
+}
+
+fn write_condition_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+    for child in node.children(&mut cursor) {
+        let kind = child.kind();
+        match kind.borrow() {
+            "if" => {
+                if writer.output.ends_with("else") {
+                    writer.output.push(' ');
+                } else {
+                    writer.write_indent();
+                }
+                write_node(child, writer)?;
+            }
+            "else" => {
+                let next_sibling_kind = next_sibling_kind(&child);
+                writer.write_indent();
+                write_node(child, writer)?;
+                if next_sibling_kind != "condition_statement" {
+                    writer.output.push('\n');
+                }
             }
             "(" => write_node(child, writer)?,
             ")" => {

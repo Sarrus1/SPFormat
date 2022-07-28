@@ -21,6 +21,7 @@ wasm-bindgen = { version = "=0.2.81", features = ["strict-macro"] }
 wasm-bindgen-futures = "0.4"
 web-sys = "0.3.57"
 web-tree-sitter-sys = "1.3"
+clap = { version = "3.2.15", features = ["derive"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 tree-sitter-sourcepawn = "0.3.0"

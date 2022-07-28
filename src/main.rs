@@ -2,26 +2,36 @@ mod language;
 mod parser;
 mod writers;
 
+#[cfg(not(target_arch = "wasm32"))]
+use clap::Parser;
 use std::borrow::Borrow;
 #[cfg(not(target_arch = "wasm32"))]
 use std::{fs, str::Utf8Error};
-use std::env;
 
 use tree_sitter::Language;
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
+/// A tool to format SourcePawn code (new AND old syntaxes).
+#[derive(Parser, Debug)]
+#[clap(author, version, about, long_about = None)]
+struct Args {
+    /// The file to format.
+    #[clap(short, long, value_parser)]
+    file: String,
+}
+
 #[allow(dead_code)]
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> Result<(), Utf8Error> {
-    let args: Vec<String> = env::args().collect();
+    let args = Args::parse();
 
-    let filename = &args[1];
+    let filename = args.file;
     let source =
-        fs::read_to_string(filename).expect("Something went wrong while reading the file.");
+        fs::read_to_string(&filename).expect("Something went wrong while reading the file.");
     let output = format_string(&source).unwrap();
-    fs::write(filename, output).expect("Something went wrong writing the file.");
+    fs::write(&filename, output).expect("Something went wrong while writing the file.");
     Ok(())
 }
 
@@ -29,7 +39,7 @@ fn main() -> Result<(), Utf8Error> {
 pub fn format_string(input: &String) -> anyhow::Result<String> {
     let language = tree_sitter_sourcepawn::language().into();
     let output = format_string_language(&input, language)
-        .expect("An error has occured while generating the SourcePawn code.");
+        .expect("An error has occured while generating the Sourcepawn code.");
     Ok(output)
 }
 

@@ -10,6 +10,13 @@ pub struct Writer<'a> {
     pub skip: u8,
 }
 
+impl Writer<'_> {
+    fn write_indent(&mut self) {
+        self.output
+            .push_str(self.indent_string.repeat(self.indent).as_str());
+    }
+}
+
 pub fn write_preproc_include(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
 
@@ -334,8 +341,15 @@ fn write_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     Ok(())
 }
 
-fn write_variable_declaration_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+fn write_variable_declaration_statement(
+    node: Node,
+    writer: &mut Writer,
+    is_for_loop: bool,
+) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
+    if !is_for_loop {
+        writer.write_indent();
+    }
 
     for child in node.children(&mut cursor) {
         match child.kind().borrow() {
@@ -344,12 +358,78 @@ fn write_variable_declaration_statement(node: Node, writer: &mut Writer) -> Resu
             "dimension" => write_dimension(child, writer)?,
             "variable_declaration" => write_variable_declaration(child, writer)?,
             "comment" => write_comment(child, writer)?,
+            ";" => writer.output.push(';'),
+            "," => writer.output.push_str(", "),
             _ => write_node(child, writer)?,
         }
     }
 
-    if !writer.output.ends_with(';') {
-        writer.output.push_str(";\n");
+    if !is_for_loop {
+        if !writer.output.ends_with(';') {
+            writer.output.push(';');
+        }
+        writer.output.push('\n');
+    }
+
+    Ok(())
+}
+
+fn write_old_variable_declaration_statement(
+    node: Node,
+    writer: &mut Writer,
+    is_for_loop: bool,
+) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+    if !is_for_loop {
+        writer.write_indent();
+    }
+
+    for child in node.children(&mut cursor) {
+        match child.kind().borrow() {
+            "variable_storage_class" => write_variable_storage_class(child, writer)?,
+            "new" | "decl" => {
+                write_node(child, writer)?;
+                writer.output.push(' ');
+            }
+            "old_variable_declaration" => write_old_variable_declaration(child, writer)?,
+            "comment" => write_comment(child, writer)?,
+            ";" => writer.output.push(';'),
+            "," => writer.output.push_str(", "),
+            _ => write_node(child, writer)?,
+        }
+    }
+
+    if !is_for_loop {
+        if !writer.output.ends_with(';') {
+            writer.output.push(';');
+        }
+        writer.output.push('\n');
+    }
+
+    Ok(())
+}
+
+fn write_old_variable_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+    // Write the dimensions of a declaration, if they exist.
+    for child in node.named_children(&mut cursor) {
+        match child.kind().borrow() {
+            "old_type" => write_old_type(child, writer)?,
+            "dimension" => write_dimension(child, writer)?,
+            "fixed_dimension" => write_fixed_dimension(child, writer)?,
+            "symbol" => write_node(child, writer)?,
+            _ => continue,
+        }
+    }
+
+    // Write the default value of a declaration, if it exists.
+    for child in node.children_by_field_name("initialValue", &mut cursor) {
+        if child.kind().to_string() == "=" {
+            writer.output.push_str(" = ");
+            continue;
+        }
+        write_expression(child, writer)?;
+        break;
     }
 
     Ok(())
@@ -704,7 +784,7 @@ fn write_old_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     writer
         .output
         .push_str(node.utf8_text(writer.source)?.borrow());
-    writer.output.push_str(": ");
+    writer.output.push(' ');
 
     Ok(())
 }
@@ -719,7 +799,10 @@ pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(),
             "dimension" => write_dimension(child, writer)?,
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "symbol" => write_node(child, writer)?,
-            "block" => write_block(child, writer)?,
+            "block" => {
+                writer.output.push('\n');
+                write_block(child, writer)?;
+            }
             _ => write_statement(child, writer)?,
         }
     }
@@ -827,7 +910,12 @@ fn write_function_visibility(node: Node, writer: &mut Writer) -> Result<(), Utf8
 fn write_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     match node.kind().borrow() {
         "block" => write_block(node, writer)?,
-        "variable_declaration_statement" => write_variable_declaration_statement(node, writer)?,
+        "variable_declaration_statement" => {
+            write_variable_declaration_statement(node, writer, false)?
+        }
+        "old_variable_declaration_statement" => {
+            write_old_variable_declaration_statement(node, writer, false)?
+        }
         _ => write_node(node, writer)?,
     }
     Ok(())
@@ -837,7 +925,17 @@ fn write_block(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         match child.kind().borrow() {
-            "{" | "}" => write_node(child, writer)?,
+            "{" => {
+                writer.write_indent();
+                write_node(child, writer)?;
+                writer.output.push('\n');
+                writer.indent += 1;
+            }
+            "}" => {
+                writer.write_indent();
+                write_node(child, writer)?;
+                writer.indent -= 1;
+            }
             _ => write_statement(child, writer)?,
         }
     }

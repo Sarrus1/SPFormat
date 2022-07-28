@@ -1,1 +1,5 @@
-void OnPluginStart(){int foo;}
+void OnPluginStart()
+{
+	new String: foo = "", bar = "d";
+	int foo;
+}

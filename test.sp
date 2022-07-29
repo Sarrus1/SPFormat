@@ -1,15 +1,22 @@
 void OnPluginStart()
 {
-	if(true)
+	switch (1 * 1 + 1)
 	{
-		int foo;
-	}
-	else if(true)
-	{
-		int bar;
-	}
-	else
-	{
-		int baz;
+		case 5:
+			int foo;
+		case 6:
+		{
+/** */
+		}
+		case 7:
+		{
+		}
+		case 8, 9, 10:
+		{
+		}
+		default:
+		{
+// test		
+		}
 	}
 }

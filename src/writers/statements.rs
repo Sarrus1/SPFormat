@@ -3,8 +3,10 @@ use std::{borrow::Borrow, str::Utf8Error};
 use tree_sitter::Node;
 
 use super::{
-    expressions::write_expression, next_sibling_kind, write_comment, write_node,
-    write_old_variable_declaration_statement, write_variable_declaration_statement, Writer,
+    expressions::write_expression,
+    next_sibling_kind,
+    variables::{write_old_variable_declaration_statement, write_variable_declaration_statement},
+    write_comment, write_node, Writer,
 };
 
 pub fn write_statement(node: Node, writer: &mut Writer, do_indent: bool) -> Result<(), Utf8Error> {

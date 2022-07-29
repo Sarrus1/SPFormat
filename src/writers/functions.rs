@@ -6,7 +6,8 @@ use super::{
     expressions::write_expression,
     next_sibling_kind,
     statements::{write_block, write_statement},
-    write_dimension, write_fixed_dimension, write_node, write_old_type, write_type, Writer,
+    variables::write_type,
+    write_dimension, write_fixed_dimension, write_node, write_old_type, Writer,
 };
 
 pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {

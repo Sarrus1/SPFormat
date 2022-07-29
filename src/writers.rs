@@ -1,10 +1,4 @@
 use self::expressions::write_expression;
-use self::functions::{write_function_declaration, write_function_definition};
-use self::preproc::{
-    write_preproc_define, write_preproc_generic, write_preproc_include, write_preproc_undefine,
-};
-use self::structs::{write_struct, write_struct_declaration};
-use self::variables::write_global_variable;
 
 use std::{borrow::Borrow, collections::HashSet, str::Utf8Error};
 use tree_sitter::{Language, Node};
@@ -12,6 +6,7 @@ use tree_sitter::{Language, Node};
 pub mod expressions;
 pub mod functions;
 pub mod preproc;
+pub mod source_file;
 pub mod statements;
 pub mod structs;
 pub mod variables;
@@ -45,35 +40,6 @@ impl Writer<'_> {
     fn is_literal(&mut self, kind: String) -> bool {
         return self._literal_kinds.contains(&kind);
     }
-}
-
-pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    let mut cursor = root_node.walk();
-
-    for node in root_node.children(&mut cursor) {
-        if writer.skip > 0 {
-            writer.skip -= 1;
-            continue;
-        }
-        match node.kind().borrow() {
-            "global_variable_declaration" => write_global_variable(node, writer)?,
-            "preproc_include" | "preproc_tryinclude" => write_preproc_include(node, writer)?,
-            "preproc_macro" | "preproc_define" => write_preproc_define(node, writer)?,
-            "preproc_undefine" => write_preproc_undefine(node, writer)?,
-            "preproc_if" | "preproc_endif" | "preproc_else" | "preproc_endinput"
-            | "preproc_pragma" => write_preproc_generic(node, writer)?,
-            "struct_declaration" => write_struct_declaration(node, writer)?,
-            "struct" => write_struct(node, writer)?,
-            "comment" => write_comment(node, writer)?,
-            "function_declaration" => write_function_declaration(node, writer)?,
-            "function_definition" => write_function_definition(node, writer)?,
-            _ => writer
-                .output
-                .push_str(node.utf8_text(writer.source)?.borrow()),
-        };
-    }
-
-    Ok(())
 }
 
 pub fn write_comment(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
@@ -110,35 +76,6 @@ fn write_dynamic_array(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
     Ok(())
 }
 
-fn write_function_call_arguments(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    let mut cursor = node.walk();
-    writer.output.push('(');
-    for child in node.children(&mut cursor) {
-        match child.kind().borrow() {
-            "(" | ")" => continue,
-            "symbol" | "ignore_argument" => write_node(child, writer)?,
-            "named_arg" => write_named_arg(child, writer)?,
-            _ => write_expression(child, writer)?,
-        }
-    }
-    // Remove the last ", ".
-    writer.output.pop();
-    writer.output.pop();
-    writer.output.push(')');
-
-    Ok(())
-}
-
-fn write_named_arg(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    writer.output.push('.');
-    write_node(node.child_by_field_name("name").unwrap(), writer)?;
-    writer.output.push_str(" = ");
-    // FIXME: Always write_node.
-    write_node(node.child_by_field_name("value").unwrap(), writer)?;
-
-    Ok(())
-}
-
 fn write_dimension(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let next_kind = next_sibling_kind(&node);
     writer.output.push_str("[]");
@@ -159,22 +96,6 @@ fn write_fixed_dimension(node: Node, writer: &mut Writer) -> Result<(), Utf8Erro
         }
     }
     writer.output.push(']');
-
-    Ok(())
-}
-
-fn write_old_type_cast(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    write_old_type(node.child_by_field_name("type").unwrap(), writer)?;
-    write_expression(node.child_by_field_name("value").unwrap(), writer)?;
-
-    Ok(())
-}
-
-fn write_old_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    writer
-        .output
-        .push_str(node.utf8_text(writer.source)?.borrow());
-    writer.output.push(' ');
 
     Ok(())
 }

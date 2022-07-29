@@ -1,7 +1,4 @@
-use super::{
-    write_dimension, write_dynamic_array, write_function_call_arguments, write_node,
-    write_old_type_cast, Writer,
-};
+use super::{write_dimension, write_dynamic_array, write_node, Writer};
 use std::{borrow::Borrow, str::Utf8Error};
 
 use tree_sitter::Node;
@@ -39,6 +36,22 @@ fn write_binary_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Er
     write_node(node.child_by_field_name("operator").unwrap(), writer)?;
     writer.output.push(' ');
     write_expression(node.child_by_field_name("right").unwrap(), writer)?;
+
+    Ok(())
+}
+
+fn write_old_type_cast(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    write_old_type(node.child_by_field_name("type").unwrap(), writer)?;
+    write_expression(node.child_by_field_name("value").unwrap(), writer)?;
+
+    Ok(())
+}
+
+pub fn write_old_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    writer
+        .output
+        .push_str(node.utf8_text(writer.source)?.borrow());
+    writer.output.push(' ');
 
     Ok(())
 }
@@ -205,6 +218,35 @@ fn write_sizeof_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Er
             _ => write_expression(child, writer)?,
         }
     }
+
+    Ok(())
+}
+
+fn write_function_call_arguments(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+    writer.output.push('(');
+    for child in node.children(&mut cursor) {
+        match child.kind().borrow() {
+            "(" | ")" => continue,
+            "symbol" | "ignore_argument" => write_node(child, writer)?,
+            "named_arg" => write_named_arg(child, writer)?,
+            _ => write_expression(child, writer)?,
+        }
+    }
+    // Remove the last ", ".
+    writer.output.pop();
+    writer.output.pop();
+    writer.output.push(')');
+
+    Ok(())
+}
+
+fn write_named_arg(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    writer.output.push('.');
+    write_node(node.child_by_field_name("name").unwrap(), writer)?;
+    writer.output.push_str(" = ");
+    // FIXME: Always write_node.
+    write_node(node.child_by_field_name("value").unwrap(), writer)?;
 
     Ok(())
 }

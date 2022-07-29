@@ -3,11 +3,11 @@ use std::{borrow::Borrow, str::Utf8Error};
 use tree_sitter::Node;
 
 use super::{
-    expressions::write_expression,
+    expressions::{write_expression, write_old_type},
     next_sibling_kind,
     statements::{write_block, write_statement},
     variables::write_type,
-    write_dimension, write_fixed_dimension, write_node, write_old_type, Writer,
+    write_dimension, write_fixed_dimension, write_node, Writer,
 };
 
 pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {

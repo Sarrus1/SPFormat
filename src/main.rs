@@ -13,6 +13,8 @@ use tree_sitter::Language;
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen::prelude::*;
 
+use crate::writers::source_file::write_source_file;
+
 #[cfg(not(target_arch = "wasm32"))]
 /// A tool to format SourcePawn code (new AND old syntaxes).
 #[derive(Parser, Debug)]
@@ -71,7 +73,7 @@ fn format_string_language(input: &String, language: Language) -> anyhow::Result<
         _literal_kinds: HashSet::new(),
     };
     build_writer(&mut writer);
-    writers::write_source_file(parsed.root_node(), &mut writer)?;
+    write_source_file(parsed.root_node(), &mut writer)?;
     Ok(writer.output)
 }
 

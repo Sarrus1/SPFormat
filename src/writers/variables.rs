@@ -1,6 +1,7 @@
 use super::{
-    expressions::write_expression, next_sibling_kind, write_comment, write_dimension,
-    write_dynamic_array, write_fixed_dimension, write_node, write_old_type, Writer,
+    expressions::{write_expression, write_old_type},
+    next_sibling_kind, write_comment, write_dimension, write_dynamic_array, write_fixed_dimension,
+    write_node, Writer,
 };
 use std::{borrow::Borrow, str::Utf8Error};
 

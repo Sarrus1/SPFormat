@@ -4,7 +4,7 @@ mod writers;
 
 #[cfg(not(target_arch = "wasm32"))]
 use clap::Parser;
-use std::{borrow::Borrow, collections::HashSet};
+use std::collections::HashSet;
 #[cfg(not(target_arch = "wasm32"))]
 use std::{fs, str::Utf8Error};
 
@@ -72,30 +72,7 @@ fn format_string_language(input: &String, language: Language) -> anyhow::Result<
         _literal_kinds: HashSet::new(),
     };
     build_writer(&mut writer);
-    for node in parsed.root_node().children(&mut cursor) {
-        if writer.skip > 0 {
-            writer.skip -= 1;
-            continue;
-        }
-        match node.kind().borrow() {
-            "global_variable_declaration" => writers::write_global_variable(node, &mut writer)?,
-            "preproc_include" | "preproc_tryinclude" => {
-                writers::write_preproc_include(node, &mut writer)?
-            }
-            "preproc_macro" | "preproc_define" => writers::write_preproc_define(node, &mut writer)?,
-            "preproc_undefine" => writers::write_preproc_undefine(node, &mut writer)?,
-            "preproc_if" | "preproc_endif" | "preproc_else" | "preproc_endinput"
-            | "preproc_pragma" => writers::write_preproc_generic(node, &mut writer)?,
-            "struct_declaration" => writers::write_struct_declaration(node, &mut writer)?,
-            "struct" => writers::write_struct(node, &mut writer)?,
-            "comment" => writers::write_comment(node, &mut writer)?,
-            "function_declaration" => writers::write_function_declaration(node, &mut writer)?,
-            "function_definition" => writers::write_function_definition(node, &mut writer)?,
-            _ => writer
-                .output
-                .push_str(node.utf8_text(writer.source)?.borrow()),
-        };
-    }
+    writers::write_source_file(parsed.root_node(), &mut writer);
     Ok(writer.output)
 }
 

@@ -949,6 +949,9 @@ fn write_statement(node: Node, writer: &mut Writer, do_indent: bool) -> Result<(
         }
         "condition_statement" => write_condition_statement(node, writer)?,
         "switch_statement" => write_switch_statement(node, writer)?,
+        "return_statement" => write_return_statement(node, writer)?,
+        "delete_statement" => write_delete_statement(node, writer)?,
+        "expression_statement" => write_expression_statement(node, writer)?,
         _ => write_node(node, writer)?,
     }
     if do_indent {
@@ -1178,6 +1181,7 @@ fn write_switch_case_values(node: Node, writer: &mut Writer) -> Result<(), Utf8E
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
+            "comment" => write_comment(child, writer)?,
             "symbol" => write_node(child, writer)?,
             "," => writer.output.push_str(", "),
             _ => {
@@ -1189,6 +1193,76 @@ fn write_switch_case_values(node: Node, writer: &mut Writer) -> Result<(), Utf8E
             }
         }
     }
+
+    Ok(())
+}
+
+fn write_return_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+    for child in node.children(&mut cursor) {
+        let kind = child.kind();
+        match kind.borrow() {
+            "comment" => write_comment(child, writer)?,
+            "return" => {
+                writer.write_indent();
+                writer.output.push_str("return ");
+            }
+            ";" => writer.output.push(';'),
+            _ => {
+                if writer.is_expression(kind.to_string()) {
+                    write_expression(child, writer)?;
+                } else {
+                    write_node(child, writer)?
+                }
+            }
+        }
+    }
+    writer.output.push('\n');
+
+    Ok(())
+}
+
+fn write_delete_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+    for child in node.children(&mut cursor) {
+        let kind = child.kind();
+        match kind.borrow() {
+            "comment" => write_comment(child, writer)?,
+            "delete" => {
+                writer.write_indent();
+                writer.output.push_str("delete ");
+            }
+            ";" => writer.output.push(';'),
+            _ => {
+                if writer.is_expression(kind.to_string()) {
+                    write_expression(child, writer)?;
+                } else {
+                    write_node(child, writer)?
+                }
+            }
+        }
+    }
+    writer.output.push('\n');
+
+    Ok(())
+}
+
+fn write_expression_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+    for child in node.children(&mut cursor) {
+        let kind = child.kind();
+        match kind.borrow() {
+            "comment" => write_comment(child, writer)?,
+            _ => {
+                if writer.is_expression(kind.to_string()) {
+                    write_expression(child, writer)?;
+                } else {
+                    write_node(child, writer)?
+                }
+            }
+        }
+    }
+    writer.output.push('\n');
 
     Ok(())
 }

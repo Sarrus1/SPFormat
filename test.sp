@@ -19,4 +19,6 @@ void OnPluginStart()
 // test		
 		}
 	}
+	delete timer;
+	return (MAXPLAYERS + 1);
 }

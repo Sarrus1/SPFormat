@@ -59,7 +59,6 @@ fn format_string_language(input: &String, language: Language) -> anyhow::Result<
     let parsed = parser.parse(&input, None)?.unwrap();
     #[cfg(debug_assertions)]
     println!("{}", parsed.root_node().to_sexp());
-    let mut cursor = parsed.walk();
     let mut writer = writers::Writer {
         output: String::new(),
         source: input.as_bytes(),
@@ -72,7 +71,7 @@ fn format_string_language(input: &String, language: Language) -> anyhow::Result<
         _literal_kinds: HashSet::new(),
     };
     build_writer(&mut writer);
-    writers::write_source_file(parsed.root_node(), &mut writer);
+    writers::write_source_file(parsed.root_node(), &mut writer)?;
     Ok(writer.output)
 }
 

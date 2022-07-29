@@ -1,5 +1,5 @@
-use crate::writers::expressions::write_expression;
-use crate::writers::{write_comment, write_dimension, write_fixed_dimension, write_node, Writer};
+use super::expressions::write_expression;
+use super::{write_comment, write_dimension, write_fixed_dimension, write_node, Writer};
 use std::{borrow::Borrow, str::Utf8Error};
 
 use tree_sitter::Node;

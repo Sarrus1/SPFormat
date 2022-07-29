@@ -1,4 +1,4 @@
-use crate::writers::{write_comment, write_node, Writer};
+use super::{write_comment, write_node, Writer};
 use std::{borrow::Borrow, str::Utf8Error};
 
 use tree_sitter::Node;

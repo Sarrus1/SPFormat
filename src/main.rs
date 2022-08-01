@@ -25,12 +25,22 @@ pub struct Args {
     /// The file to format.
     #[clap(short, long, value_parser)]
     file: String,
+
     /// Number of empty lines to insert before a function declaration.
     #[clap(long, value_parser, default_value_t = 2)]
     breaks_before_function_decl: u32,
+
     /// Number of empty lines to insert before a function definition.
     #[clap(long, value_parser, default_value_t = 2)]
     breaks_before_function_def: u32,
+
+    /// Whether or not to break before a function declaration brace.
+    #[clap(long, value_parser, default_value_t = true)]
+    function_break_before_braces: bool,
+
+    /// Whether or not to break before a loop statement brace.
+    #[clap(long, value_parser, default_value_t = true)]
+    loop_break_before_braces: bool,
 }
 
 #[allow(dead_code)]

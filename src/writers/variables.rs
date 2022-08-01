@@ -116,11 +116,8 @@ pub fn write_variable_declaration_statement(
         }
     }
 
-    if !is_for_loop {
-        if !writer.output.ends_with(';') {
-            writer.output.push(';');
-        }
-        writer.output.push('\n');
+    if !is_for_loop && !writer.output.ends_with(';') {
+        writer.output.push(';');
     }
 
     Ok(())

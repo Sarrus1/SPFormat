@@ -29,10 +29,15 @@ pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(),
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "symbol" => write_node(child, writer)?,
             "block" => {
-                writer.output.push('\n');
-                write_block(child, writer)?;
+                if writer.settings.function_break_before_braces {
+                    writer.output.push('\n');
+                    write_block(child, writer, true)?;
+                } else {
+                    writer.output.push(' ');
+                    write_block(child, writer, false)?;
+                }
             }
-            _ => write_statement(child, writer, false)?,
+            _ => write_statement(child, writer, false, false)?,
         }
     }
 

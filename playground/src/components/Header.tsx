@@ -28,8 +28,7 @@ export default function Header(props: HeaderProps) {
             onClick={(e) => {
               sp_format(props.code, props.settings as Settings)
                 .then((res) => props.setCode(res))
-                .catch((err) => console.log(err))
-                .finally(() => console.log(props.settings));
+                .catch((err) => console.log(err));
             }}
           >
             Format

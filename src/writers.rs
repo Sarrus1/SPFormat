@@ -118,3 +118,11 @@ fn next_sibling_kind(node: &Node) -> String {
     }
     return String::from(next_node.unwrap().kind());
 }
+
+fn prev_sibling_kind(node: &Node) -> String {
+    let prev_node = node.prev_sibling();
+    if prev_node.is_none() {
+        return String::from("");
+    }
+    return String::from(prev_node.unwrap().kind());
+}

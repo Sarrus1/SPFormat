@@ -4,7 +4,7 @@ use tree_sitter::Node;
 
 use super::{
     expressions::{write_expression, write_old_type},
-    next_sibling_kind,
+    next_sibling_kind, prev_sibling_kind,
     statements::{write_block, write_statement},
     variables::write_type,
     write_dimension, write_fixed_dimension, write_node, Writer,
@@ -12,9 +12,12 @@ use super::{
 
 pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let nb_lines: usize = usize::try_from(writer.settings.breaks_before_function_decl).unwrap();
+    let prev_kind = prev_sibling_kind(&node);
 
-    // Insert two new lines automatically:
-    writer.output.push_str("\n".repeat(nb_lines).as_str());
+    if !(prev_kind == "" || prev_kind.starts_with("preproc_") || prev_kind == "comment") {
+        // Insert two new lines automatically:
+        writer.output.push_str("\n".repeat(nb_lines).as_str());
+    }
 
     let mut cursor = node.walk();
 
@@ -38,9 +41,12 @@ pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(),
 
 pub fn write_function_definition(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let nb_lines: usize = usize::try_from(writer.settings.breaks_before_function_def).unwrap();
+    let prev_kind = prev_sibling_kind(&node);
 
-    // Insert two new lines automatically:
-    writer.output.push_str("\n".repeat(nb_lines).as_str());
+    if !(prev_kind == "" || prev_kind.starts_with("preproc_") || prev_kind == "comment") {
+        // Insert two new lines automatically:
+        writer.output.push_str("\n".repeat(nb_lines).as_str());
+    }
 
     let mut cursor = node.walk();
 

@@ -29,21 +29,17 @@ function App() {
   return (
     <div style={{ overflowX: "hidden" }}>
       <Header code={code} settings={settings} setCode={setCode} />
-      <div className="row">
-        <div className="column">
-          <SettingsPanel settings={settings} setSettings={setSettings} />
-        </div>
-        <div className="column">
-          <Editor
-            height="100vh"
-            width="50vw"
-            theme="vs-dark"
-            defaultLanguage="cpp"
-            value={code}
-            onChange={handleEditorChange}
-            onMount={handleEditorDidMount}
-          />
-        </div>
+      <div className="grid grid-cols-2">
+        <SettingsPanel settings={settings} setSettings={setSettings} />
+        <Editor
+          height="93.3vh"
+          width="50vw"
+          theme="vs-dark"
+          defaultLanguage="cpp"
+          value={code}
+          onChange={handleEditorChange}
+          onMount={handleEditorDidMount}
+        />
       </div>
     </div>
   );

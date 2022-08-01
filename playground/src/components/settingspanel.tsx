@@ -1,4 +1,4 @@
-import { OutlinedTextFieldProps, TextField } from "@material-ui/core";
+import { TextField } from "@material-ui/core";
 import React from "react";
 import { Settings } from "../interfaces";
 
@@ -17,37 +17,37 @@ interface SettingRowProps {
 
 function SettingRow(props: SettingRowProps) {
   return (
-    <>
-      <span
-        style={{
-          float: "left",
-          display: "inline-block",
-          verticalAlign: "middle",
-          lineHeight: "normal",
-        }}
-      >
-        {props.name}
-      </span>
-      <TextField
-        inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-        style={{ float: "right" }}
-        defaultValue={props.defaultValue}
-        variant="outlined"
-        size="small"
-        onChange={props.onChange}
-      />
-      <div style={{ clear: "both" }}></div>
-    </>
+    <div className="flex items-center grid grid-cols-2 gap-4 mb-1">
+      <span>{props.name}</span>
+      <div>
+        <TextField
+          className="float-right"
+          inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+          defaultValue={props.defaultValue}
+          variant="outlined"
+          size="small"
+          style={{ maxWidth: "10rem" }}
+          onChange={props.onChange}
+        />
+      </div>
+    </div>
   );
 }
 
 function SettingsPanel(props: SettingsPanelProps) {
   return (
-    <div style={{ margin: "1rem", textAlign: "center" }}>
+    <div style={{ margin: "1rem" }}>
       <SettingRow
         name="Breaks before function declaration"
         onChange={(e) => {
           props.settings.breaks_before_function_decl = Number(e.target.value);
+        }}
+        defaultValue={2}
+      />
+      <SettingRow
+        name="Breaks before function definition"
+        onChange={(e) => {
+          props.settings.breaks_before_function_def = Number(e.target.value);
         }}
         defaultValue={2}
       />

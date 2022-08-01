@@ -61,7 +61,7 @@ fn global_variable_declaration_break(node: &Node, writer: &mut Writer) -> Result
         return Ok(());
     }
     if prev_node.kind() != "global_variable_declaration" {
-        writer.output.push('\n');
+        writer.breakl();
         return Ok(());
     }
     // Don't double next line if same type.
@@ -75,7 +75,7 @@ fn global_variable_declaration_break(node: &Node, writer: &mut Writer) -> Result
         .utf8_text(writer.source)?;
 
     if var_type != prev_var_type {
-        writer.output.push('\n');
+        writer.breakl();
         return Ok(());
     }
 
@@ -152,7 +152,7 @@ pub fn write_old_variable_declaration_statement(
         if !writer.output.ends_with(';') {
             writer.output.push(';');
         }
-        writer.output.push('\n');
+        writer.breakl();
     }
 
     Ok(())

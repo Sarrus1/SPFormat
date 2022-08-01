@@ -23,7 +23,7 @@ pub fn write_preproc_include(node: Node, writer: &mut Writer) -> Result<(), Utf8
         }
     }
     if !writer.output.ends_with('\n') {
-        writer.output.push('\n');
+        writer.breakl();
     }
 
     Ok(())
@@ -48,7 +48,7 @@ pub fn write_preproc_define(node: Node, writer: &mut Writer) -> Result<(), Utf8E
         }
     }
     if !writer.output.ends_with('\n') {
-        writer.output.push('\n');
+        writer.breakl();
     }
 
     Ok(())
@@ -69,7 +69,7 @@ pub fn write_preproc_undefine(node: Node, writer: &mut Writer) -> Result<(), Utf
         }
     }
     if !writer.output.ends_with('\n') {
-        writer.output.push('\n');
+        writer.breakl();
     }
 
     Ok(())
@@ -95,7 +95,7 @@ pub fn write_preproc_generic(node: Node, writer: &mut Writer) -> Result<(), Utf8
         }
     }
     if !writer.output.ends_with('\n') {
-        writer.output.push('\n');
+        writer.breakl();
     }
 
     Ok(())

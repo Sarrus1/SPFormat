@@ -32,6 +32,10 @@ impl Writer<'_> {
             .push_str(self.indent_string.repeat(self.indent).as_str());
     }
 
+    fn breakl(&mut self) {
+        self.output.push('\n');
+    }
+
     fn is_statement(&mut self, kind: String) -> bool {
         return self._statement_kinds.contains(&kind);
     }
@@ -53,14 +57,14 @@ pub fn write_comment(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
             "comment" => {
                 if node.start_position().row() - 1 > prev_node.end_position().row() {
                     // Add a single break
-                    writer.output.push('\n');
+                    writer.breakl();
                 }
             }
             _ => {}
         }
     }
     write_node(node, writer)?;
-    writer.output.push('\n');
+    writer.breakl();
 
     Ok(())
 }

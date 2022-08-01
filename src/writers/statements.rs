@@ -50,7 +50,7 @@ pub fn write_statement(
         writer.indent -= 1;
     }
     if do_break {
-        writer.output.push('\n');
+        writer.breakl();
     }
 
     Ok(())
@@ -85,15 +85,15 @@ fn write_for_loop(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
                     if end_condition_reached {
                         if kind == "block" {
                             if writer.settings.loop_break_before_braces {
-                                writer.output.push('\n');
-                                write_statement(child, writer, false, true)?;
+                                writer.breakl();
+                                write_block(child, writer, true)?;
                             } else {
                                 writer.output.push(' ');
-                                write_statement(child, writer, false, true)?;
+                                write_block(child, writer, false)?;
                             }
                         } else {
-                            writer.output.push('\n');
-                            write_statement(child, writer, true, true)?;
+                            writer.breakl();
+                            write_statement(child, writer, true, false)?;
                         }
                     } else {
                         match kind.borrow() {
@@ -133,7 +133,7 @@ fn write_while_loop(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
             "(" => write_node(child, writer)?,
             ")" => {
                 write_node(child, writer)?;
-                writer.output.push('\n')
+                writer.breakl()
             }
             _ => {
                 if writer.is_statement(kind.to_string()) {
@@ -164,7 +164,7 @@ fn write_do_while_loop(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
             "do" => {
                 writer.write_indent();
                 write_node(child, writer)?;
-                writer.output.push('\n');
+                writer.breakl();
             }
             "while" => {
                 writer.write_indent();
@@ -173,7 +173,7 @@ fn write_do_while_loop(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
             "(" => write_node(child, writer)?,
             ")" => {
                 write_node(child, writer)?;
-                writer.output.push('\n')
+                writer.breakl()
             }
             _ => {
                 if writer.is_statement(kind.to_string()) {
@@ -209,7 +209,7 @@ fn write_switch_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Err
             "(" => write_node(child, writer)?,
             ")" => {
                 write_node(child, writer)?;
-                writer.output.push('\n')
+                writer.breakl()
             }
             "{" => {
                 writer.write_indent();
@@ -398,13 +398,13 @@ fn write_condition_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8
                 writer.write_indent();
                 write_node(child, writer)?;
                 if next_sibling_kind != "condition_statement" {
-                    writer.output.push('\n');
+                    writer.breakl();
                 }
             }
             "(" => write_node(child, writer)?,
             ")" => {
                 write_node(child, writer)?;
-                writer.output.push('\n')
+                writer.breakl()
             }
             _ => {
                 if writer.is_statement(kind.to_string()) {
@@ -437,7 +437,7 @@ pub fn write_block(node: Node, writer: &mut Writer, do_indent: bool) -> Result<(
                     writer.write_indent();
                 }
                 write_node(child, writer)?;
-                writer.output.push('\n');
+                writer.breakl();
                 writer.indent += 1;
             }
             "}" => {

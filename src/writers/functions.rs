@@ -15,7 +15,7 @@ pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(),
     let prev_kind = prev_sibling_kind(&node);
 
     if !(prev_kind == "" || prev_kind.starts_with("preproc_") || prev_kind == "comment") {
-        // Insert two new lines automatically:
+        // Insert two new lines automatically
         writer.output.push_str("\n".repeat(nb_lines).as_str());
     }
 
@@ -30,7 +30,7 @@ pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(),
             "symbol" => write_node(child, writer)?,
             "block" => {
                 if writer.settings.function_break_before_braces {
-                    writer.output.push('\n');
+                    writer.breakl();
                     write_block(child, writer, true)?;
                 } else {
                     writer.output.push(' ');

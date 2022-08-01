@@ -12,7 +12,6 @@
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "sp_format": "file:../pkg",
-    "vite-plugin-static-copy": "^0.6.1",
     "vite-plugin-wasm": "^2.1.0"
   },
   "devDependencies": {

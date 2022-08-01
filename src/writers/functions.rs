@@ -11,6 +11,11 @@ use super::{
 };
 
 pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let nb_lines: usize = usize::try_from(writer.settings.breaks_before_function_decl).unwrap();
+
+    // Insert two new lines automatically:
+    writer.output.push_str("\n".repeat(nb_lines).as_str());
+
     let mut cursor = node.walk();
 
     for child in node.children(&mut cursor) {
@@ -32,6 +37,11 @@ pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(),
 }
 
 pub fn write_function_definition(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let nb_lines: usize = usize::try_from(writer.settings.breaks_before_function_def).unwrap();
+
+    // Insert two new lines automatically:
+    writer.output.push_str("\n".repeat(nb_lines).as_str());
+
     let mut cursor = node.walk();
 
     for child in node.children(&mut cursor) {

@@ -1,5 +1,6 @@
 mod language;
 mod parser;
+pub mod settings;
 mod writers;
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -19,10 +20,16 @@ use crate::writers::source_file::write_source_file;
 /// A tool to format SourcePawn code (new AND old syntaxes).
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
-struct Args {
+pub struct Args {
     /// The file to format.
     #[clap(short, long, value_parser)]
     file: String,
+    /// Number of empty lines to insert before a function declaration.
+    #[clap(long, value_parser, default_value_t = 2)]
+    breaks_before_function_decl: u32,
+    /// Number of empty lines to insert before a function definition.
+    #[clap(long, value_parser, default_value_t = 2)]
+    breaks_before_function_def: u32,
 }
 
 #[allow(dead_code)]
@@ -30,33 +37,38 @@ struct Args {
 fn main() -> Result<(), Utf8Error> {
     let args = Args::parse();
 
+    let settings = settings::build_settings_from_args(&args);
     let filename = args.file;
     let source =
         fs::read_to_string(&filename).expect("Something went wrong while reading the file.");
-    let output = format_string(&source).unwrap();
+    let output = format_string(&source, settings).unwrap();
     fs::write(&filename, output).expect("Something went wrong while writing the file.");
     Ok(())
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn format_string(input: &String) -> anyhow::Result<String> {
+pub fn format_string(input: &String, settings: settings::Settings) -> anyhow::Result<String> {
     let language = tree_sitter_sourcepawn::language().into();
-    let output = format_string_language(&input, language)
+    let output = format_string_language(&input, language, settings)
         .expect("An error has occured while generating the Sourcepawn code.");
     Ok(output)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
-pub async fn sp_format(input: String) -> Result<String, JsValue> {
+pub async fn sp_format(input: String, settings: settings::Settings) -> Result<String, JsValue> {
     tree_sitter::TreeSitter::init().await?;
     let language = language::sourcepawn().await.unwrap();
-    let output = format_string_language(&input, language)
+    let output = format_string_language(&input, language, settings)
         .expect("An error has occured while generating the SourcePawn code.");
     Ok(output)
 }
 
-fn format_string_language(input: &String, language: Language) -> anyhow::Result<String> {
+fn format_string_language(
+    input: &String,
+    language: Language,
+    settings: settings::Settings,
+) -> anyhow::Result<String> {
     let mut parser = parser::sourcepawn(&language)?;
     let parsed = parser.parse(&input, None)?.unwrap();
     #[cfg(debug_assertions)]
@@ -68,6 +80,7 @@ fn format_string_language(input: &String, language: Language) -> anyhow::Result<
         indent: 0,
         indent_string: "\t".to_string(),
         skip: 0,
+        settings: settings,
         _statement_kinds: HashSet::new(),
         _expression_kinds: HashSet::new(),
         _literal_kinds: HashSet::new(),

@@ -1,3 +1,5 @@
+use crate::settings::Settings;
+
 use self::expressions::write_expression;
 
 use std::{borrow::Borrow, collections::HashSet, str::Utf8Error};
@@ -18,6 +20,7 @@ pub struct Writer<'a> {
     pub indent: usize,
     pub indent_string: String,
     pub skip: u8,
+    pub settings: Settings,
     pub _statement_kinds: HashSet<String>,
     pub _expression_kinds: HashSet<String>,
     pub _literal_kinds: HashSet<String>,

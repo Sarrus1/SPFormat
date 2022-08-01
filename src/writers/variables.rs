@@ -52,7 +52,6 @@ fn global_variable_declaration_break(node: &Node, writer: &mut Writer) -> Result
     let prev_node = node.prev_sibling();
 
     if prev_node.is_none() {
-        writer.output.push('\n');
         return Ok(());
     }
     let prev_node = prev_node.unwrap();

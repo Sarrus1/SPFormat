@@ -17,7 +17,7 @@ jobs:
       - name: Build wasm
         run: wasm-pack build --target web
       - name: Download pkg deps
-        run: cp pkg/node_modules/web-tree-sitter/tree-sitter.wasm playground/tree-sitter.wasm
+        run: cd pkg && npm i && cd .. && cp pkg/node_modules/web-tree-sitter/tree-sitter.wasm playground/tree-sitter.wasm
       - name: Setup Playground
         run: cd playground && npm i && npm run build
       - name: Get version

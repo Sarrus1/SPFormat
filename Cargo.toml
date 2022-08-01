@@ -16,8 +16,12 @@ anyhow = "1.0"
 futures = "0.3"
 thiserror = "1.0"
 js-sys = "0.3.57"
+serde = { version = "1.0.140", features = ["derive"] }
 tree-sitter = { version = "0.9.0", package = "tree-sitter-facade" }
-wasm-bindgen = { version = "=0.2.81", features = ["strict-macro"] }
+wasm-bindgen = { version = "=0.2.81", features = [
+    "strict-macro",
+    "serde-serialize",
+] }
 wasm-bindgen-futures = "0.4"
 web-sys = "0.3.57"
 web-tree-sitter-sys = "1.3"

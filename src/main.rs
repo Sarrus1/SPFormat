@@ -9,6 +9,7 @@ use std::collections::HashSet;
 #[cfg(not(target_arch = "wasm32"))]
 use std::{fs, str::Utf8Error};
 
+use settings::Settings;
 use tree_sitter::Language;
 
 #[cfg(target_arch = "wasm32")]
@@ -47,19 +48,21 @@ fn main() -> Result<(), Utf8Error> {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn format_string(input: &String, settings: settings::Settings) -> anyhow::Result<String> {
+pub fn format_string(input: &String, settings: Settings) -> anyhow::Result<String> {
     let language = tree_sitter_sourcepawn::language().into();
-    let output = format_string_language(&input, language, settings)
+    let output = format_string_language(&input, language, &settings)
         .expect("An error has occured while generating the Sourcepawn code.");
+
     Ok(output)
 }
 
 #[cfg(target_arch = "wasm32")]
 #[wasm_bindgen]
-pub async fn sp_format(input: String, settings: settings::Settings) -> Result<String, JsValue> {
+pub async fn sp_format(input: String, val: JsValue) -> Result<String, JsValue> {
     tree_sitter::TreeSitter::init().await?;
     let language = language::sourcepawn().await.unwrap();
-    let output = format_string_language(&input, language, settings)
+    let settings: Settings = val.into_serde().unwrap();
+    let output = format_string_language(&input, language, &settings)
         .expect("An error has occured while generating the SourcePawn code.");
     Ok(output)
 }
@@ -67,7 +70,7 @@ pub async fn sp_format(input: String, settings: settings::Settings) -> Result<St
 fn format_string_language(
     input: &String,
     language: Language,
-    settings: settings::Settings,
+    settings: &Settings,
 ) -> anyhow::Result<String> {
     let mut parser = parser::sourcepawn(&language)?;
     let parsed = parser.parse(&input, None)?.unwrap();

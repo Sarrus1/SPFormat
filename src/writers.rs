@@ -20,7 +20,7 @@ pub struct Writer<'a> {
     pub indent: usize,
     pub indent_string: String,
     pub skip: u8,
-    pub settings: Settings,
+    pub settings: &'a Settings,
     pub _statement_kinds: HashSet<String>,
     pub _expression_kinds: HashSet<String>,
     pub _literal_kinds: HashSet<String>,

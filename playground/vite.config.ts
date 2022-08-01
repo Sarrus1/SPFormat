@@ -11,12 +11,7 @@ export default defineConfig({
       allow: ["../pkg", "."],
     },
   },
-  plugins: [
-    react(),
-    wasm({
-      filter: /.+\.wasm$/,
-    }),
-  ],
+  plugins: [react(), wasm()],
   build: {
     rollupOptions: {
       output: {

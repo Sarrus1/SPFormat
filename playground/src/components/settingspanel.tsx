@@ -1,4 +1,4 @@
-import { TextField, Select, MenuItem, FormControl } from "@material-ui/core";
+import { TextField, Switch, FormGroup, FormControlLabel } from "@mui/material";
 import React from "react";
 import { Settings } from "../interfaces";
 
@@ -10,12 +10,9 @@ interface SettingsPanelProps {
 interface SettingRowBoolProps {
   name: string;
   onChange: (
-    e: React.ChangeEvent<{
-      name?: string | undefined;
-      value: unknown;
-    }>
+    event: React.ChangeEvent<HTMLInputElement>,
+    checked: boolean
   ) => void;
-  defaultValue: number;
 }
 
 interface SettingRowNumericProps {
@@ -28,38 +25,58 @@ interface SettingRowNumericProps {
 
 function SettingRowNumeric(props: SettingRowNumericProps) {
   return (
-    <div className="flex items-center grid grid-cols-2 gap-4 mb-1">
+    <div
+      className="items-center grid gap-4 mb-1"
+      style={{ gridTemplateColumns: "1fr 15rem" }}
+    >
       <span>{props.name}</span>
-      <div>
-        <TextField
-          className="float-right"
-          inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
-          defaultValue={props.defaultValue}
-          variant="outlined"
-          size="small"
-          style={{ maxWidth: "10rem" }}
-          onChange={props.onChange}
-        />
-      </div>
+      <TextField
+        className="col-span-1"
+        inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
+        defaultValue={props.defaultValue}
+        variant="outlined"
+        size="small"
+        onChange={props.onChange}
+      />
     </div>
   );
 }
 
 function SettingRowBool(props: SettingRowBoolProps) {
   return (
-    <div className="flex items-center grid grid-cols-2 gap-4 mb-1">
-      <span>{props.name}</span>
-      <FormControl size="small" style={{ maxWidth: "10rem" }}>
-        <Select
-          className="float-right"
-          variant="outlined"
-          defaultValue={1}
-          onChange={props.onChange}
-        >
-          <MenuItem value={1}>True</MenuItem>
-          <MenuItem value={0}>False</MenuItem>
-        </Select>
-      </FormControl>
+    <FormGroup>
+      <FormControlLabel
+        control={<Switch defaultChecked onChange={props.onChange} />}
+        label={props.name}
+      />
+    </FormGroup>
+  );
+}
+
+function BraceWrappingRow(props) {
+  return (
+    <div
+      className="grid grid-cols-2 gap-4 mb-1 mt-2"
+      style={{ gridTemplateColumns: "1fr 15rem" }}
+    >
+      <span className="col-span-1">Brace Wrapping</span>
+      <fieldset>
+        <legend>Brace Wrapping</legend>
+        <SettingRowBool
+          name="Before function braces"
+          onChange={(e) => {
+            const old = props.settings.function_break_before_braces;
+            props.settings.function_break_before_braces = !old;
+          }}
+        />
+        <SettingRowBool
+          name="Before loop braces"
+          onChange={(e) => {
+            const old = props.settings.loop_break_before_braces;
+            props.settings.loop_break_before_braces = !old;
+          }}
+        />
+      </fieldset>
     </div>
   );
 }
@@ -81,20 +98,7 @@ function SettingsPanel(props: SettingsPanelProps) {
         }}
         defaultValue={2}
       />
-      <SettingRowBool
-        name="Break before function braces"
-        onChange={(e) => {
-          props.settings.function_break_before_braces = Boolean(e.target.value);
-        }}
-        defaultValue={1}
-      />
-      <SettingRowBool
-        name="Break before loop braces"
-        onChange={(e) => {
-          props.settings.loop_break_before_braces = Boolean(e.target.value);
-        }}
-        defaultValue={1}
-      />
+      <BraceWrappingRow />
     </div>
   );
 }

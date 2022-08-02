@@ -1,4 +1,4 @@
-import { Box, Toolbar, Button, AppBar, Typography } from "@material-ui/core";
+import { Box, Toolbar, Button, AppBar, Typography } from "@mui/material";
 import packageJson from "../../package.json";
 
 import { sp_format } from "sp_format";

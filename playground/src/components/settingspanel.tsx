@@ -29,7 +29,7 @@ function SettingRowNumeric(props: SettingRowNumericProps) {
       className="items-center grid gap-4 mb-1"
       style={{ gridTemplateColumns: "1fr 15rem" }}
     >
-      <span>{props.name}</span>
+      <span className="font-roboto font-bold">{props.name}</span>
       <TextField
         className="col-span-1"
         inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }}
@@ -59,9 +59,9 @@ function BraceWrappingRow(props: SettingsPanelProps) {
       className="grid grid-cols-2 gap-4 mb-1 mt-2"
       style={{ gridTemplateColumns: "1fr 15rem" }}
     >
-      <span className="col-span-1">Brace Wrapping</span>
+      <span className="col-span-1 font-roboto font-bold">Brace Wrapping</span>
       <fieldset>
-        <legend>Brace Wrapping</legend>
+        <p className="font-roboto font-bold">Brace Wrapping</p>
         <SettingRowBool
           name="Before function braces"
           onChange={(e) => {

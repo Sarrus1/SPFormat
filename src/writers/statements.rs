@@ -84,7 +84,7 @@ fn write_for_loop(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
 
                     if end_condition_reached {
                         if kind == "block" {
-                            if writer.settings.loop_break_before_braces {
+                            if writer.settings.brace_wrapping_before_loop {
                                 writer.breakl();
                                 write_block(child, writer, true)?;
                             } else {

@@ -29,7 +29,7 @@ pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(),
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "symbol" => write_node(child, writer)?,
             "block" => {
-                if writer.settings.function_break_before_braces {
+                if writer.settings.brace_wrapping_before_function {
                     writer.breakl();
                     write_block(child, writer, true)?;
                 } else {

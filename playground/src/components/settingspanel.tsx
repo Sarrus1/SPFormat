@@ -53,7 +53,7 @@ function SettingRowBool(props: SettingRowBoolProps) {
   );
 }
 
-function BraceWrappingRow(props) {
+function BraceWrappingRow(props: SettingsPanelProps) {
   return (
     <div
       className="grid grid-cols-2 gap-4 mb-1 mt-2"
@@ -65,15 +65,15 @@ function BraceWrappingRow(props) {
         <SettingRowBool
           name="Before function braces"
           onChange={(e) => {
-            const old = props.settings.function_break_before_braces;
-            props.settings.function_break_before_braces = !old;
+            const old = props.settings.brace_wrapping_before_function;
+            props.settings.brace_wrapping_before_function = !old;
           }}
         />
         <SettingRowBool
           name="Before loop braces"
           onChange={(e) => {
-            const old = props.settings.loop_break_before_braces;
-            props.settings.loop_break_before_braces = !old;
+            const old = props.settings.brace_wrapping_before_loop;
+            props.settings.brace_wrapping_before_loop = !old;
           }}
         />
       </fieldset>
@@ -98,7 +98,7 @@ function SettingsPanel(props: SettingsPanelProps) {
         }}
         defaultValue={2}
       />
-      <BraceWrappingRow />
+      <BraceWrappingRow {...props} />
     </div>
   );
 }

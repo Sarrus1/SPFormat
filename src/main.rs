@@ -36,11 +36,11 @@ pub struct Args {
 
     /// Whether or not to break before a function declaration brace.
     #[clap(long, value_parser, default_value_t = true)]
-    function_break_before_braces: bool,
+    brace_wrapping_before_function: bool,
 
     /// Whether or not to break before a loop statement brace.
     #[clap(long, value_parser, default_value_t = true)]
-    loop_break_before_braces: bool,
+    brace_wrapping_before_loop: bool,
 }
 
 #[allow(dead_code)]

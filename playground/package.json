@@ -8,6 +8,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.0",
+    "@emotion/styled": "^11.10.0",
+    "@mui/material": "^5.9.3",
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
     "sp_format": "file:../pkg",

@@ -76,6 +76,13 @@ function BraceWrappingRow(props: SettingsPanelProps) {
             props.settings.brace_wrapping_before_loop = !old;
           }}
         />
+        <SettingRowBool
+          name="Before condition braces"
+          onChange={(e) => {
+            const old = props.settings.brace_wrapping_before_condition;
+            props.settings.brace_wrapping_before_condition = !old;
+          }}
+        />
       </fieldset>
     </div>
   );

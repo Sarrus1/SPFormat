@@ -427,6 +427,7 @@ fn write_condition_statement(
     writer: &mut Writer,
     do_indent: bool,
 ) -> Result<(), Utf8Error> {
+    let mut out_of_condition = false;
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         let kind = child.kind();
@@ -450,14 +451,26 @@ fn write_condition_statement(
             "(" => write_node(child, writer)?,
             ")" => {
                 write_node(child, writer)?;
-                writer.breakl()
+                out_of_condition = true;
             }
             _ => {
                 if writer.is_statement(kind.to_string()) {
-                    if writer.output.ends_with(';') {
-                        writer.output.push(' ');
+                    if out_of_condition {
+                        if kind == "block" {
+                            if writer.settings.brace_wrapping_before_loop {
+                                writer.breakl();
+                                write_block(child, writer, true)?;
+                            } else {
+                                writer.output.push(' ');
+                                write_block(child, writer, false)?;
+                            }
+                        } else {
+                            writer.breakl();
+                            write_statement(child, writer, true, false)?;
+                        }
+                    } else {
+                        write_statement(child, writer, false, false)?;
                     }
-                    write_statement(child, writer, false, true)?;
                 } else if writer.is_expression(kind.to_string()) {
                     if writer.output.ends_with(';') {
                         writer.output.push(' ');

@@ -1,5 +1,9 @@
 void OnPluginStart()
 {
+	if(true)
+	{
+		te++;
+	}
 	while(true)
 	{
 		i++;
@@ -13,6 +17,16 @@ void OnPluginStart()
 		o++
 	}
 	while (true)
+	switch (1)
+	{
+		case 1:
+		true
+		case 2:
+{
+			hello;
+		}
+	}
+
 	int foo;
 	foo = test(1, 2);
 	delete foo;

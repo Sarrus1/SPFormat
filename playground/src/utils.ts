@@ -6,5 +6,6 @@ export function makeDefaultSettings(): Settings {
     breaks_before_function_def: 2,
     brace_wrapping_before_loop: true,
     brace_wrapping_before_function: true,
+    brace_wrapping_before_condition: true,
   };
 }

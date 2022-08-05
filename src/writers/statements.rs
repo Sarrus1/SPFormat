@@ -254,10 +254,14 @@ fn write_switch_statement(
             "(" => write_node(child, writer)?,
             ")" => {
                 write_node(child, writer)?;
-                writer.breakl()
             }
             "{" => {
-                writer.write_indent();
+                if writer.settings.brace_wrapping_before_condition {
+                    writer.breakl();
+                    writer.write_indent();
+                } else {
+                    writer.output.push(' ');
+                }
                 writer.output.push('{');
                 writer.breakl();
                 writer.indent += 1;
@@ -469,11 +473,7 @@ fn write_condition_statement(
             "else" => {
                 writer.breakl();
                 writer.write_indent();
-                // let next_sibling_kind = next_sibling_kind(&child);
                 write_node(child, writer)?;
-                // if next_sibling_kind != "condition_statement" {
-                //     writer.breakl();
-                // }
                 out_of_condition = true;
                 else_statement = true;
             }
@@ -486,7 +486,7 @@ fn write_condition_statement(
                 if writer.is_statement(kind.to_string()) {
                     if out_of_condition {
                         if kind == "block" {
-                            if writer.settings.brace_wrapping_before_loop {
+                            if writer.settings.brace_wrapping_before_condition {
                                 writer.breakl();
                                 write_block(child, writer, true)?;
                             } else {
@@ -494,10 +494,14 @@ fn write_condition_statement(
                                 write_block(child, writer, false)?;
                             }
                         } else {
-                            if !(else_statement && kind == "condition_statement") {
-                                writer.breakl();
+                            if else_statement && kind == "condition_statement" {
+                                write_statement(child, writer, true, false)?;
+                                continue;
                             }
+                            writer.breakl();
+                            writer.indent += 1;
                             write_statement(child, writer, true, false)?;
+                            writer.indent -= 1;
                         }
                     } else {
                         write_statement(child, writer, false, false)?;

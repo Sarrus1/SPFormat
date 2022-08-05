@@ -9,6 +9,7 @@ pub struct Settings {
     pub breaks_before_function_def: u32,
     pub brace_wrapping_before_function: bool,
     pub brace_wrapping_before_loop: bool,
+    pub brace_wrapping_before_condition: bool,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -18,6 +19,7 @@ pub fn build_settings_from_args(args: &Args) -> Settings {
         breaks_before_function_decl: args.breaks_before_function_decl,
         brace_wrapping_before_function: args.brace_wrapping_before_function,
         brace_wrapping_before_loop: args.brace_wrapping_before_loop,
+        brace_wrapping_before_condition: args.brace_wrapping_before_condition,
     };
 
     return settings;

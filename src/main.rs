@@ -41,6 +41,10 @@ pub struct Args {
     /// Whether or not to break before a loop statement brace.
     #[clap(long, value_parser, default_value_t = true)]
     brace_wrapping_before_loop: bool,
+
+    /// Whether or not to break before a condition statement brace.
+    #[clap(long, value_parser, default_value_t = true)]
+    brace_wrapping_before_condition: bool,
 }
 
 #[allow(dead_code)]

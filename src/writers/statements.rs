@@ -428,6 +428,7 @@ fn write_condition_statement(
     do_indent: bool,
 ) -> Result<(), Utf8Error> {
     let mut out_of_condition = false;
+    let mut else_statement = false;
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         let kind = child.kind();
@@ -441,12 +442,15 @@ fn write_condition_statement(
                 write_node(child, writer)?;
             }
             "else" => {
-                let next_sibling_kind = next_sibling_kind(&child);
+                writer.breakl();
                 writer.write_indent();
+                // let next_sibling_kind = next_sibling_kind(&child);
                 write_node(child, writer)?;
-                if next_sibling_kind != "condition_statement" {
-                    writer.breakl();
-                }
+                // if next_sibling_kind != "condition_statement" {
+                //     writer.breakl();
+                // }
+                out_of_condition = true;
+                else_statement = true;
             }
             "(" => write_node(child, writer)?,
             ")" => {
@@ -465,7 +469,9 @@ fn write_condition_statement(
                                 write_block(child, writer, false)?;
                             }
                         } else {
-                            writer.breakl();
+                            if !(else_statement && kind == "condition_statement") {
+                                writer.breakl();
+                            }
                             write_statement(child, writer, true, false)?;
                         }
                     } else {

@@ -4,6 +4,14 @@ void OnPluginStart()
 	{
 		te++;
 	}
+	else if(true)
+	{
+		te++;
+	}
+	else
+	{
+		te++;
+	}
 	while(true)
 	{
 		i++;

@@ -15,39 +15,42 @@ pub fn write_statement(
     do_indent: bool,
     do_break: bool,
 ) -> Result<(), Utf8Error> {
-    if do_indent {
-        writer.indent += 1;
-    }
     match node.kind().borrow() {
         "block" => write_block(node, writer, do_indent)?,
         "variable_declaration_statement" => {
-            write_variable_declaration_statement(node, writer, false)?
+            write_variable_declaration_statement(node, writer, do_indent)?
         }
         "old_variable_declaration_statement" => {
-            write_old_variable_declaration_statement(node, writer, false)?
+            write_old_variable_declaration_statement(node, writer, do_indent)?
         }
-        "for_loop" => write_for_loop(node, writer)?,
-        "while_loop" => write_while_loop(node, writer)?,
-        "do_while_loop" => write_do_while_loop(node, writer)?,
+        "for_loop" => write_for_loop(node, writer, do_indent)?,
+        "while_loop" => write_while_loop(node, writer, do_indent)?,
+        "do_while_loop" => write_do_while_loop(node, writer, do_indent)?,
         "break_statement" => {
-            writer.write_indent();
+            if do_indent {
+                writer.write_indent();
+            }
             writer.output.push_str("break");
             writer.output.push(';');
         }
         "continue_statement" => {
-            writer.write_indent();
+            if do_indent {
+                writer.write_indent();
+            }
             writer.output.push_str("continue");
             writer.output.push(';');
         }
-        "condition_statement" => write_condition_statement(node, writer)?,
-        "switch_statement" => write_switch_statement(node, writer)?,
-        "return_statement" => write_return_statement(node, writer)?,
-        "delete_statement" => write_delete_statement(node, writer)?,
-        "expression_statement" => write_expression_statement(node, writer)?,
+        "condition_statement" => write_condition_statement(node, writer, do_indent)?,
+        "switch_statement" => write_switch_statement(node, writer, do_indent)?,
+        "return_statement" => write_return_statement(node, writer, do_indent)?,
+        "delete_statement" => write_delete_statement(node, writer, do_indent)?,
+        "expression_statement" => {
+            if do_indent {
+                writer.write_indent();
+            }
+            write_expression_statement(node, writer)?
+        }
         _ => write_node(node, writer)?,
-    }
-    if do_indent {
-        writer.indent -= 1;
     }
     if do_break {
         writer.breakl();
@@ -56,14 +59,16 @@ pub fn write_statement(
     Ok(())
 }
 
-fn write_for_loop(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+fn write_for_loop(node: Node, writer: &mut Writer, do_indent: bool) -> Result<(), Utf8Error> {
     let mut end_condition_reached = false;
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
             "for" => {
-                writer.write_indent();
+                if do_indent {
+                    writer.write_indent();
+                }
                 write_node(child, writer)?;
             }
             "(" => write_node(child, writer)?,
@@ -76,12 +81,59 @@ fn write_for_loop(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
             "," => writer.output.push_str(", "),
             _ => {
                 if writer.is_statement(kind.to_string()) {
-                    if writer.output.ends_with(';') {
-                        writer.output.push(' ');
+                    if !end_condition_reached {
+                        if writer.output.ends_with(";") {
+                            writer.output.push(' ');
+                        }
                         write_statement(child, writer, false, false)?;
                         continue;
                     }
+                    if kind == "block" {
+                        if writer.settings.brace_wrapping_before_loop {
+                            writer.breakl();
+                            write_block(child, writer, true)?;
+                        } else {
+                            writer.output.push(' ');
+                            write_block(child, writer, false)?;
+                        }
+                    } else {
+                        writer.breakl();
+                        write_statement(child, writer, true, false)?;
+                    }
+                } else if writer.is_expression(kind.to_string()) {
+                    if writer.output.ends_with(';') {
+                        writer.output.push(' ');
+                    }
+                    write_expression(child, writer)?;
+                } else {
+                    write_node(child, writer)?;
+                }
+            }
+        }
+    }
 
+    Ok(())
+}
+
+fn write_while_loop(node: Node, writer: &mut Writer, do_indent: bool) -> Result<(), Utf8Error> {
+    let mut end_condition_reached = false;
+    let mut cursor = node.walk();
+    for child in node.children(&mut cursor) {
+        let kind = child.kind();
+        match kind.borrow() {
+            "while" => {
+                if do_indent {
+                    writer.write_indent();
+                }
+                write_node(child, writer)?;
+            }
+            "(" => write_node(child, writer)?,
+            ")" => {
+                end_condition_reached = true;
+                write_node(child, writer)?;
+            }
+            _ => {
+                if writer.is_statement(kind.to_string()) {
                     if end_condition_reached {
                         if kind == "block" {
                             if writer.settings.brace_wrapping_before_loop {
@@ -96,15 +148,7 @@ fn write_for_loop(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
                             write_statement(child, writer, true, false)?;
                         }
                     } else {
-                        match kind.borrow() {
-                            "variable_declaration_statement" => {
-                                write_variable_declaration_statement(child, writer, true)?
-                            }
-                            "old_variable_declaration_statement" => {
-                                write_old_variable_declaration_statement(child, writer, true)?
-                            }
-                            _ => write_node(child, writer)?,
-                        }
+                        write_statement(child, writer, false, false)?;
                     }
                 } else if writer.is_expression(kind.to_string()) {
                     if writer.output.ends_with(';') {
@@ -121,66 +165,46 @@ fn write_for_loop(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     Ok(())
 }
 
-fn write_while_loop(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    let mut cursor = node.walk();
-    for child in node.children(&mut cursor) {
-        let kind = child.kind();
-        match kind.borrow() {
-            "while" => {
-                writer.write_indent();
-                write_node(child, writer)?;
-            }
-            "(" => write_node(child, writer)?,
-            ")" => {
-                write_node(child, writer)?;
-                writer.breakl()
-            }
-            _ => {
-                if writer.is_statement(kind.to_string()) {
-                    if writer.output.ends_with(';') {
-                        writer.output.push(' ');
-                    }
-                    write_statement(child, writer, false, false)?;
-                } else if writer.is_expression(kind.to_string()) {
-                    if writer.output.ends_with(';') {
-                        writer.output.push(' ');
-                    }
-                    write_expression(child, writer)?;
-                } else {
-                    write_node(child, writer)?;
-                }
-            }
-        }
-    }
-
-    Ok(())
-}
-
-fn write_do_while_loop(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+fn write_do_while_loop(node: Node, writer: &mut Writer, do_indent: bool) -> Result<(), Utf8Error> {
+    let mut in_condition = false;
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
             "do" => {
-                writer.write_indent();
-                write_node(child, writer)?;
-                writer.breakl();
+                if do_indent {
+                    writer.write_indent();
+                }
+                writer.output.push_str("do");
             }
             "while" => {
+                in_condition = true;
                 writer.write_indent();
-                write_node(child, writer)?;
+                writer.output.push_str("while ");
             }
             "(" => write_node(child, writer)?,
             ")" => {
                 write_node(child, writer)?;
-                writer.breakl()
             }
             _ => {
                 if writer.is_statement(kind.to_string()) {
-                    if writer.output.ends_with(';') {
-                        writer.output.push(' ');
+                    if in_condition {
+                        write_statement(child, writer, false, false)?;
+                        continue;
                     }
-                    write_statement(child, writer, false, false)?;
+                    if kind == "block" {
+                        if writer.settings.brace_wrapping_before_loop {
+                            writer.breakl();
+                            write_block(child, writer, true)?;
+                        } else {
+                            writer.output.push(' ');
+                            write_block(child, writer, false)?;
+                        }
+                        writer.breakl();
+                    } else {
+                        writer.breakl();
+                        write_statement(child, writer, true, false)?;
+                    }
                 } else if writer.is_expression(kind.to_string()) {
                     if writer.output.ends_with(';') {
                         writer.output.push(' ');
@@ -196,13 +220,19 @@ fn write_do_while_loop(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
     Ok(())
 }
 
-fn write_switch_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+fn write_switch_statement(
+    node: Node,
+    writer: &mut Writer,
+    do_indent: bool,
+) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
             "switch" => {
-                writer.write_indent();
+                if do_indent {
+                    writer.write_indent();
+                }
                 write_node(child, writer)?;
                 writer.output.push(' ');
             }
@@ -313,14 +343,20 @@ fn write_switch_case_values(node: Node, writer: &mut Writer) -> Result<(), Utf8E
     Ok(())
 }
 
-fn write_return_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+fn write_return_statement(
+    node: Node,
+    writer: &mut Writer,
+    do_indent: bool,
+) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
             "comment" => write_comment(child, writer)?,
             "return" => {
-                writer.write_indent();
+                if do_indent {
+                    writer.write_indent();
+                }
                 writer.output.push_str("return ");
             }
             ";" => writer.output.push(';'),
@@ -337,14 +373,20 @@ fn write_return_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Err
     Ok(())
 }
 
-fn write_delete_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+fn write_delete_statement(
+    node: Node,
+    writer: &mut Writer,
+    do_indent: bool,
+) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
             "comment" => write_comment(child, writer)?,
             "delete" => {
-                writer.write_indent();
+                if do_indent {
+                    writer.write_indent();
+                }
                 writer.output.push_str("delete ");
             }
             ";" => writer.output.push(';'),
@@ -380,7 +422,11 @@ fn write_expression_statement(node: Node, writer: &mut Writer) -> Result<(), Utf
     Ok(())
 }
 
-fn write_condition_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+fn write_condition_statement(
+    node: Node,
+    writer: &mut Writer,
+    do_indent: bool,
+) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         let kind = child.kind();
@@ -388,7 +434,7 @@ fn write_condition_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8
             "if" => {
                 if writer.output.ends_with("else") {
                     writer.output.push(' ');
-                } else {
+                } else if do_indent {
                     writer.write_indent();
                 }
                 write_node(child, writer)?;
@@ -429,6 +475,7 @@ fn write_condition_statement(node: Node, writer: &mut Writer) -> Result<(), Utf8
 
 pub fn write_block(node: Node, writer: &mut Writer, do_indent: bool) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
+
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
@@ -448,7 +495,7 @@ pub fn write_block(node: Node, writer: &mut Writer, do_indent: bool) -> Result<(
             "comment" => write_comment(child, writer)?,
             _ => {
                 if writer.is_statement(kind.to_string()) {
-                    write_statement(child, writer, false, true)?
+                    write_statement(child, writer, true, true)?
                 } else {
                     write_node(child, writer)?
                 }

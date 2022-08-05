@@ -102,11 +102,7 @@ fn write_new_instance(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
 
 fn write_function_call(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let function_node = node.child_by_field_name("function").unwrap();
-    match function_node.kind().borrow() {
-        "symbol" => write_node(function_node, writer)?,
-        "field_access" => write_field_access(function_node, writer)?,
-        _ => println!("Unexpected function node."),
-    }
+    write_expression(function_node, writer)?;
     write_function_call_arguments(node.child_by_field_name("arguments").unwrap(), writer)?;
 
     Ok(())
@@ -224,19 +220,29 @@ fn write_sizeof_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Er
 
 fn write_function_call_arguments(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
-    writer.output.push('(');
     for child in node.children(&mut cursor) {
         match child.kind().borrow() {
-            "(" | ")" => continue,
+            "(" => writer.output.push('('),
+            ")" => {
+                if writer.output.ends_with(", ") {
+                    writer.output.pop();
+                    writer.output.pop();
+                }
+                writer.output.push(')')
+            }
+            "," => writer.output.push_str(", "),
             "symbol" | "ignore_argument" => write_node(child, writer)?,
             "named_arg" => write_named_arg(child, writer)?,
-            _ => write_expression(child, writer)?,
+            _ => {
+                let kind = child.kind();
+                if writer.is_expression(kind.to_string()) {
+                    write_expression(child, writer)?
+                } else {
+                    write_node(child, writer)?;
+                }
+            }
         }
     }
-    // Remove the last ", ".
-    writer.output.pop();
-    writer.output.pop();
-    writer.output.push(')');
 
     Ok(())
 }

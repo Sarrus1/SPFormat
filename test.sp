@@ -1,7 +1,19 @@
 void OnPluginStart()
 {
-	for(int i = 0; i <= MaxClients; i++) {
-		int baz;
+	while(true)
+	{
+		i++;
 	}
-	int barrr;
+	for(int i = 0; i <= MaxClients; i++)
+	{
+		i++;
+	}
+	do
+	{
+		o++
+	}
+	while (true)
+	int foo;
+	foo = test(1, 2);
+	delete foo;
 }

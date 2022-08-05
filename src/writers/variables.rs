@@ -96,10 +96,10 @@ pub fn write_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
 pub fn write_variable_declaration_statement(
     node: Node,
     writer: &mut Writer,
-    is_for_loop: bool,
+    do_indent: bool,
 ) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
-    if !is_for_loop {
+    if do_indent {
         writer.write_indent();
     }
 
@@ -116,7 +116,7 @@ pub fn write_variable_declaration_statement(
         }
     }
 
-    if !is_for_loop && !writer.output.ends_with(';') {
+    if do_indent && !writer.output.ends_with(';') {
         writer.output.push(';');
     }
 
@@ -126,10 +126,10 @@ pub fn write_variable_declaration_statement(
 pub fn write_old_variable_declaration_statement(
     node: Node,
     writer: &mut Writer,
-    is_for_loop: bool,
+    do_indent: bool,
 ) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
-    if !is_for_loop {
+    if do_indent {
         writer.write_indent();
     }
 
@@ -148,7 +148,7 @@ pub fn write_old_variable_declaration_statement(
         }
     }
 
-    if !is_for_loop {
+    if do_indent {
         if !writer.output.ends_with(';') {
             writer.output.push(';');
         }

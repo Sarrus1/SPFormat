@@ -35,6 +35,7 @@ void OnPluginStart()
 		o++
 	}
 	while(true)
+
 	switch(1)
 	{
 		case 1:
@@ -46,7 +47,9 @@ void OnPluginStart()
 		default:
 			true;
 	}
+
 	int foo;
 	foo = test(1, 2);
+
 	delete foo;
 }

@@ -14,6 +14,9 @@ pub fn write_statement(
     do_indent: bool,
     do_break: bool,
 ) -> Result<(), Utf8Error> {
+    let sp = node.end_position().row();
+    let next_sibling = node.next_sibling();
+
     match node.kind().borrow() {
         "block" => write_block(node, writer, do_indent)?,
         "variable_declaration_statement" => {
@@ -52,6 +55,14 @@ pub fn write_statement(
         _ => write_node(node, writer)?,
     }
     if do_break {
+        // Add another break if the next sibling is not right below/next
+        // to the current sibling.
+        if !next_sibling.is_none() {
+            let st = next_sibling.unwrap().start_position().row();
+            if st - sp > 1 {
+                writer.breakl();
+            }
+        }
         writer.breakl();
     }
 

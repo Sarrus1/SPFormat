@@ -4,4 +4,5 @@ export interface Settings {
   brace_wrapping_before_function: boolean;
   brace_wrapping_before_loop: boolean;
   brace_wrapping_before_condition: boolean;
+  brace_wrapping_before_enum_struct: boolean;
 }

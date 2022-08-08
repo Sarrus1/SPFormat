@@ -7,5 +7,6 @@ export function makeDefaultSettings(): Settings {
     brace_wrapping_before_loop: true,
     brace_wrapping_before_function: true,
     brace_wrapping_before_condition: true,
+    brace_wrapping_before_enum_struct: true,
   };
 }

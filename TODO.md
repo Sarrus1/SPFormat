@@ -1,4 +1,4 @@
-## Chore features:
+## Core features:
 
 [X] assertion
 [X] function_declaration

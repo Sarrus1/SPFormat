@@ -21,6 +21,6 @@
 [X] preproc_macro
 [X] preproc_undefine
 [X] preproc_endinput
-[ ] hardcoded_symbol
+[X] hardcoded_symbol
 [ ] alias_declaration
 [ ] alias_assignment

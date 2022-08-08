@@ -34,6 +34,7 @@ pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf
             "comment" => write_comment(node, writer)?,
             "function_declaration" => write_function_declaration(node, writer)?,
             "function_definition" => write_function_definition(node, writer)?,
+            "hardcoded_symbol" => write_hardcoded_symbol(node, writer)?,
             _ => writer
                 .output
                 .push_str(node.utf8_text(writer.source)?.borrow()),
@@ -54,6 +55,23 @@ pub fn write_assertion(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
             ";" => write_node(child, writer)?,
             "comment" => write_comment(child, writer)?,
             _ => println!("Unexpected kind {} in write_assertion.", kind),
+        }
+    }
+    writer.breakl();
+
+    Ok(())
+}
+
+pub fn write_hardcoded_symbol(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+
+    for child in node.children(&mut cursor) {
+        let kind = child.kind();
+        match kind.borrow() {
+            "using __intrinsics__.Handle" => write_node(child, writer)?,
+            ";" => write_node(child, writer)?,
+            "comment" => write_comment(child, writer)?,
+            _ => println!("Unexpected kind {} in write_hardcoded_symbol.", kind),
         }
     }
     writer.breakl();

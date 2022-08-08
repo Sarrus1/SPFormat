@@ -84,6 +84,13 @@ function BraceWrappingRow(props: SettingsPanelProps) {
           }}
         />
         <SettingRowBool
+          name="Before enum braces"
+          onChange={(e) => {
+            const old = props.settings.brace_wrapping_before_enum;
+            props.settings.brace_wrapping_before_enum = !old;
+          }}
+        />
+        <SettingRowBool
           name="Before enum struct braces"
           onChange={(e) => {
             const old = props.settings.brace_wrapping_before_enum_struct;

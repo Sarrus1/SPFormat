@@ -3,7 +3,7 @@
 [X] assertion
 [X] function_declaration
 [X] function_definition
-[ ] enum
+[X] enum
 [ ] comment
 [X] enum_struct
 [ ] typedef

@@ -5,6 +5,7 @@ use tree_sitter::Node;
 use super::{
     alias::{write_alias_assignment, write_alias_declaration},
     enum_structs::write_enum_struct,
+    enums::write_enum,
     expressions::write_function_call_arguments,
     functions::{write_function_declaration, write_function_definition},
     preproc::{
@@ -27,6 +28,7 @@ pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf
             "assertion" => write_assertion(node, writer)?,
             "function_declaration" => write_function_declaration(node, writer)?,
             "function_definition" => write_function_definition(node, writer)?,
+            "enum" => write_enum(node, writer)?,
             "enum_struct" => write_enum_struct(node, writer)?,
             "global_variable_declaration" => write_global_variable(node, writer)?,
             "preproc_include" | "preproc_tryinclude" => write_preproc_include(node, writer)?,

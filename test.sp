@@ -14,6 +14,15 @@ native float operator*(float oper1, float oper2) = FloatMul;
 native float operator/(float oper1, float oper2) = FloatDiv;
 
 
+enum (<<=1.0) 
+{
+	BIT1 = 1,
+	BIT2,
+	BIT3,
+	BIT4,
+}
+
+
 void OnPluginStart()
 {
 	if(true)

@@ -14,6 +14,7 @@ pub mod source_file;
 pub mod statements;
 pub mod structs;
 pub mod variables;
+pub mod enums;
 
 pub struct Writer<'a> {
     pub output: String,

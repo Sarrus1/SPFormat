@@ -52,7 +52,7 @@ pub fn write_enum_struct(node: Node, writer: &mut Writer) -> Result<(), Utf8Erro
     Ok(())
 }
 
-pub fn write_enum_struct_field(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+fn write_enum_struct_field(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let nb_lines: usize = usize::try_from(writer.settings.breaks_before_function_decl).unwrap();
     let prev_kind = prev_sibling_kind(&node);
 
@@ -86,7 +86,7 @@ pub fn write_enum_struct_field(node: Node, writer: &mut Writer) -> Result<(), Ut
     Ok(())
 }
 
-pub fn write_enum_struct_method(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+fn write_enum_struct_method(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let nb_lines: usize = usize::try_from(writer.settings.breaks_before_function_decl).unwrap();
     let prev_kind = prev_sibling_kind(&node);
 

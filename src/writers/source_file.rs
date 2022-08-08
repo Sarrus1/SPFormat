@@ -3,6 +3,7 @@ use std::{borrow::Borrow, str::Utf8Error};
 use tree_sitter::Node;
 
 use super::{
+    alias::{write_alias_assignment, write_alias_declaration},
     expressions::write_function_call_arguments,
     functions::{write_function_declaration, write_function_definition},
     preproc::{
@@ -35,6 +36,8 @@ pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf
             "function_declaration" => write_function_declaration(node, writer)?,
             "function_definition" => write_function_definition(node, writer)?,
             "hardcoded_symbol" => write_hardcoded_symbol(node, writer)?,
+            "alias_declaration" => write_alias_declaration(node, writer)?,
+            "alias_assignment" => write_alias_assignment(node, writer)?,
             _ => writer
                 .output
                 .push_str(node.utf8_text(writer.source)?.borrow()),

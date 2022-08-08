@@ -69,7 +69,7 @@ pub fn write_function_definition(node: Node, writer: &mut Writer) -> Result<(), 
     Ok(())
 }
 
-fn write_argument_declarations(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+pub fn write_argument_declarations(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
 
     for child in node.children(&mut cursor) {
@@ -139,7 +139,7 @@ fn write_argument_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
     Ok(())
 }
 
-fn write_function_visibility(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+pub fn write_function_visibility(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         write_node(child, writer)?;

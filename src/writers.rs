@@ -5,6 +5,7 @@ use self::expressions::write_expression;
 use std::{borrow::Borrow, collections::HashSet, str::Utf8Error};
 use tree_sitter::{Language, Node};
 
+pub mod alias;
 pub mod expressions;
 pub mod functions;
 pub mod preproc;

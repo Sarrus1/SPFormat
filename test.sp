@@ -1,3 +1,7 @@
+static_assert(true, "This is an assertion error");
+assert(true, "This is an assertion error");
+
+
 void OnPluginStart()
 {
 	if(true)

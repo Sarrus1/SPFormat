@@ -1,6 +1,6 @@
 ## Chore features:
 
-[ ] assertion
+[X] assertion
 [X] function_declaration
 [X] function_definition
 [ ] enum

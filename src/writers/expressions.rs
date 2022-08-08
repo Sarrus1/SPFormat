@@ -218,7 +218,7 @@ fn write_sizeof_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Er
     Ok(())
 }
 
-fn write_function_call_arguments(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+pub fn write_function_call_arguments(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         match child.kind().borrow() {

@@ -5,7 +5,8 @@ using __intrinsics__.Handle;
 
 stock float operator++(float oper)
 {
-	return oper+1.0;
+	return oper
+	+1.0;
 }
 
 
@@ -68,3 +69,48 @@ void OnPluginStart()
 
 	delete foo;
 }
+
+
+enum struct WEAPONS_ENUM
+{
+	int KNIFE;
+	int GLOCK;
+	int HKP2000;
+
+
+	int GetData(int[] data)
+	{
+		data[0] = this.KNIFE;
+		data[1] = this.GLOCK;
+		data[2] = this.HKP2000;
+	}
+
+
+	void Reset()
+	{
+		this.KNIFE = 0;
+		this.GLOCK = 0;
+		this.HKP2000 = 0;
+	}
+
+
+	void AddKill(int num)
+	{
+		switch(num)
+		{
+			case 0:
+			{
+				this.KNIFE++;
+			}
+			case 1:
+			{
+				this.GLOCK++;
+			}
+			case 2:
+			{
+				this.HKP2000++;
+			}
+		}
+	}
+}
+

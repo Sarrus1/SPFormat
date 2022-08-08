@@ -14,7 +14,7 @@ pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(),
     let nb_lines: usize = usize::try_from(writer.settings.breaks_before_function_decl).unwrap();
     let prev_kind = prev_sibling_kind(&node);
 
-    if !(prev_kind == "" || prev_kind.starts_with("preproc_") || prev_kind == "comment") {
+    if !prev_kind.starts_with("preproc_") && prev_kind != "" && prev_kind != "comment" {
         // Insert two new lines automatically
         writer.output.push_str("\n".repeat(nb_lines).as_str());
     }
@@ -40,6 +40,7 @@ pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(),
             _ => write_statement(child, writer, false, false)?,
         }
     }
+    writer.breakl();
 
     Ok(())
 }
@@ -48,7 +49,7 @@ pub fn write_function_definition(node: Node, writer: &mut Writer) -> Result<(), 
     let nb_lines: usize = usize::try_from(writer.settings.breaks_before_function_def).unwrap();
     let prev_kind = prev_sibling_kind(&node);
 
-    if !(prev_kind == "" || prev_kind.starts_with("preproc_") || prev_kind == "comment") {
+    if !prev_kind.starts_with("preproc_") && prev_kind != "" && prev_kind != "comment" {
         // Insert two new lines automatically:
         writer.output.push_str("\n".repeat(nb_lines).as_str());
     }

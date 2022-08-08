@@ -16,6 +16,7 @@ pub fn write_alias_declaration(node: Node, writer: &mut Writer) -> Result<(), Ut
     let prev_kind = prev_sibling_kind(&node);
 
     if !prev_kind.starts_with("preproc_")
+        && prev_kind != ""
         && prev_kind != "comment"
         && prev_kind != "alias_declaration"
     {
@@ -62,6 +63,7 @@ pub fn write_alias_assignment(node: Node, writer: &mut Writer) -> Result<(), Utf
     let prev_kind = prev_sibling_kind(&node);
 
     if !prev_kind.starts_with("preproc_")
+        && prev_kind != ""
         && prev_kind != "comment"
         && prev_kind != "alias_assignment"
     {

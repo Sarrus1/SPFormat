@@ -61,6 +61,14 @@ pub struct Args {
     /// Whether or not to break before a funcenum declaration brace.
     #[clap(long, value_parser, default_value_t = true)]
     brace_wrapping_before_funcenum: bool,
+
+    /// Whether or not to break before a methodmap declaration brace.
+    #[clap(long, value_parser, default_value_t = true)]
+    brace_wrapping_before_methodmap: bool,
+
+    /// Whether or not to break before a methodmap property declaration brace.
+    #[clap(long, value_parser, default_value_t = true)]
+    brace_wrapping_before_methodmap_property: bool,
 }
 
 #[allow(dead_code)]

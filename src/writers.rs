@@ -17,6 +17,7 @@ pub mod statements;
 pub mod structs;
 pub mod typedefs;
 pub mod variables;
+pub mod methodmaps;
 
 pub struct Writer<'a> {
     pub output: String,

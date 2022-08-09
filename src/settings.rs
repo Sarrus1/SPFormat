@@ -12,6 +12,7 @@ pub struct Settings {
     pub brace_wrapping_before_condition: bool,
     pub brace_wrapping_before_enum_struct: bool,
     pub brace_wrapping_before_enum: bool,
+    pub brace_wrapping_before_typeset: bool,
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -24,6 +25,7 @@ pub fn build_settings_from_args(args: &Args) -> Settings {
         brace_wrapping_before_condition: args.brace_wrapping_before_condition,
         brace_wrapping_before_enum_struct: args.brace_wrapping_before_enum_struct,
         brace_wrapping_before_enum: args.brace_wrapping_before_enum,
+        brace_wrapping_before_typeset: args.brace_wrapping_before_typeset,
     };
 
     return settings;

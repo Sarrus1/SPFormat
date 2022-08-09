@@ -53,6 +53,10 @@ pub struct Args {
     /// Whether or not to break before an enum declaration brace.
     #[clap(long, value_parser, default_value_t = true)]
     brace_wrapping_before_enum: bool,
+
+    /// Whether or not to break before a typeset declaration brace.
+    #[clap(long, value_parser, default_value_t = true)]
+    brace_wrapping_before_typeset: bool,
 }
 
 #[allow(dead_code)]

@@ -7,6 +7,7 @@ export interface Settings {
   brace_wrapping_before_enum_struct: boolean;
   brace_wrapping_before_enum: boolean;
   brace_wrapping_before_typeset: boolean;
+  brace_wrapping_before_funcenum: boolean;
 }
 
 export interface HeaderProps {

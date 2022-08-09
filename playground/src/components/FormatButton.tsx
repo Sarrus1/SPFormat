@@ -1,50 +1,18 @@
-import {
-  Box,
-  Toolbar,
-  Button,
-  AppBar,
-  Typography,
-  Snackbar,
-} from "@mui/material";
-import MuiAlert, { AlertProps } from "@mui/material/Alert";
-import packageJson from "../../package.json";
+import { Button, Snackbar } from "@mui/material";
 import { useState, forwardRef } from "react";
-
 import { sp_format } from "sp_format";
-import { Settings } from "../interfaces";
+import MuiAlert, { AlertProps } from "@mui/material/Alert";
 
-const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
+import { HeaderProps, Settings } from "../interfaces";
+
+export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
   ref
 ) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-interface HeaderProps {
-  readonly code: string;
-  settings: Settings;
-  setCode: React.Dispatch<React.SetStateAction<string>>;
-}
-
-export default function Header(props: HeaderProps) {
-  return (
-    <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
-        <Toolbar
-          style={{ backgroundColor: "rgb(0, 120, 215)" }}
-          variant="dense"
-        >
-          <Typography variant="h6" component="div" style={{ flexGrow: 1 }}>
-            SPFormat v{packageJson.version}
-          </Typography>
-          <FormatButton {...props} />
-        </Toolbar>
-      </AppBar>
-    </Box>
-  );
-}
-
-function FormatButton(props: HeaderProps) {
+export function FormatButton(props: HeaderProps) {
   const [showError, setShowError] = useState(false);
 
   const handleClose = (

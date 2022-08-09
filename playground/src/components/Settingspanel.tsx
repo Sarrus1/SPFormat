@@ -1,27 +1,9 @@
 import { TextField, Switch, FormGroup, FormControlLabel } from "@mui/material";
-import React from "react";
-import { Settings } from "../interfaces";
-
-interface SettingsPanelProps {
-  settings: Settings;
-  setSettings: React.Dispatch<React.SetStateAction<Settings>>;
-}
-
-interface SettingRowBoolProps {
-  name: string;
-  onChange: (
-    event: React.ChangeEvent<HTMLInputElement>,
-    checked: boolean
-  ) => void;
-}
-
-interface SettingRowNumericProps {
-  name: string;
-  onChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => void;
-  defaultValue: number;
-}
+import {
+  SettingRowBoolProps,
+  SettingRowNumericProps,
+  SettingsPanelProps,
+} from "../interfaces";
 
 function SettingRowNumeric(props: SettingRowNumericProps) {
   return (

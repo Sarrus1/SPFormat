@@ -8,6 +8,8 @@ export interface Settings {
   brace_wrapping_before_enum: boolean;
   brace_wrapping_before_typeset: boolean;
   brace_wrapping_before_funcenum: boolean;
+  brace_wrapping_before_methodmap: boolean;
+  brace_wrapping_before_methodmap_property: boolean;
 }
 
 export interface HeaderProps {

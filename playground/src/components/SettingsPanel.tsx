@@ -93,6 +93,20 @@ function BraceWrappingRow(props: SettingsPanelProps) {
             props.settings.brace_wrapping_before_funcenum = !old;
           }}
         />
+        <SettingRowBool
+          name="Before methodmap braces"
+          onChange={(e) => {
+            const old = props.settings.brace_wrapping_before_methodmap;
+            props.settings.brace_wrapping_before_methodmap = !old;
+          }}
+        />
+        <SettingRowBool
+          name="Before methodmap property braces"
+          onChange={(e) => {
+            const old = props.settings.brace_wrapping_before_methodmap_property;
+            props.settings.brace_wrapping_before_methodmap_property = !old;
+          }}
+        />
       </fieldset>
     </div>
   );

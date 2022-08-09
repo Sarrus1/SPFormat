@@ -9,6 +9,7 @@ pub mod alias;
 pub mod enum_structs;
 pub mod enums;
 pub mod expressions;
+pub mod functags;
 pub mod functions;
 pub mod preproc;
 pub mod source_file;

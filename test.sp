@@ -16,7 +16,11 @@ native float operator/(float oper1, float oper2) = FloatDiv;
 typedef SQLTxnFailure = function void(Database db, any data, int numQueries, const char[] error, int failIndex, any[] queryData);
 
 
-typeset EventHook {
+functag SrvCmd Action: public(args);
+
+
+typeset EventHook
+{
 // comment
 	function Action(Event event, const char[] name, bool dontBroadcast);
 // comment

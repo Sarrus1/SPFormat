@@ -80,7 +80,7 @@ pub fn write_typeset(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
             "comment" => write_comment(child, writer)?,
             ";" => continue,
             _ => {
-                println!("Unexpected kind {} in write_typedef.", kind);
+                println!("Unexpected kind {} in write_typeset.", kind);
             }
         }
     }
@@ -111,7 +111,7 @@ fn write_typedef_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8E
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "(" | ")" => continue,
             _ => {
-                println!("Unexpected kind {} in write_typedef.", kind);
+                println!("Unexpected kind {} in write_typedef_expression.", kind);
             }
         }
     }

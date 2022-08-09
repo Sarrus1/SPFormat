@@ -7,7 +7,7 @@
 [ ] comment
 [X] enum_struct
 [X] typedef
-[ ] typeset
+[X] typeset
 [ ] functag
 [ ] funcenum
 [ ] methodmap

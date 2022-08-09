@@ -79,6 +79,13 @@ function BraceWrappingRow(props: SettingsPanelProps) {
             props.settings.brace_wrapping_before_enum_struct = !old;
           }}
         />
+        <SettingRowBool
+          name="Before typeset braces"
+          onChange={(e) => {
+            const old = props.settings.brace_wrapping_before_typeset;
+            props.settings.brace_wrapping_before_typeset = !old;
+          }}
+        />
       </fieldset>
     </div>
   );

@@ -9,5 +9,6 @@ export function makeDefaultSettings(): Settings {
     brace_wrapping_before_condition: true,
     brace_wrapping_before_enum_struct: true,
     brace_wrapping_before_enum: true,
+    brace_wrapping_before_typeset: true,
   };
 }

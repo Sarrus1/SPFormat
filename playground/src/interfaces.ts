@@ -6,6 +6,7 @@ export interface Settings {
   brace_wrapping_before_condition: boolean;
   brace_wrapping_before_enum_struct: boolean;
   brace_wrapping_before_enum: boolean;
+  brace_wrapping_before_typeset: boolean;
 }
 
 export interface HeaderProps {

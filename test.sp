@@ -19,6 +19,15 @@ typedef SQLTxnFailure = function void(Database db, any data, int numQueries, con
 functag SrvCmd Action: public(args);
 
 
+funcenum Timer
+{
+// comment
+	Action: public (Handle:Timer, Handle:hndl),
+// comment
+	Action: public (Handle:timer),
+};
+
+
 typeset EventHook
 {
 // comment

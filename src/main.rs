@@ -57,6 +57,10 @@ pub struct Args {
     /// Whether or not to break before a typeset declaration brace.
     #[clap(long, value_parser, default_value_t = true)]
     brace_wrapping_before_typeset: bool,
+
+    /// Whether or not to break before a funcenum declaration brace.
+    #[clap(long, value_parser, default_value_t = true)]
+    brace_wrapping_before_funcenum: bool,
 }
 
 #[allow(dead_code)]

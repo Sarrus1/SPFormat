@@ -67,7 +67,6 @@ pub fn write_typeset(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
                 writer.output.push_str("}");
                 writer.indent -= 1;
             }
-            "=" => writer.output.push_str(" = "),
             "typedef_expression" => {
                 let next_kind = next_sibling_kind(&child);
                 write_typedef_expression(child, writer)?;

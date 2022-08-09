@@ -8,8 +8,8 @@
 [X] enum_struct
 [X] typedef
 [X] typeset
-[ ] functag
-[ ] funcenum
+[X] functag
+[X] funcenum
 [ ] methodmap
 [X] struct
 [X] struct_declaration

@@ -84,11 +84,11 @@ fn global_variable_declaration_break(node: &Node, writer: &mut Writer) -> Result
     Ok(())
 }
 
-pub fn write_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+pub fn write_type(node: Node, writer: &mut Writer, insert_space: bool) -> Result<(), Utf8Error> {
     let next_kind = next_sibling_kind(&node);
 
     write_node(node, writer)?;
-    if next_kind != "dimension" {
+    if insert_space && next_kind != "dimension" && next_kind != "fixed_dimension" {
         writer.output.push(' ')
     };
 
@@ -108,7 +108,7 @@ pub fn write_variable_declaration_statement(
     for child in node.children(&mut cursor) {
         match child.kind().borrow() {
             "variable_storage_class" => write_variable_storage_class(child, writer)?,
-            "type" => write_type(child, writer)?,
+            "type" => write_type(child, writer, true)?,
             "dimension" => write_dimension(child, writer)?,
             "variable_declaration" => write_variable_declaration(child, writer)?,
             "comment" => write_comment(child, writer)?,

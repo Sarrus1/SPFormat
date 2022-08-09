@@ -6,7 +6,7 @@
 [X] enum
 [ ] comment
 [X] enum_struct
-[ ] typedef
+[X] typedef
 [ ] typeset
 [ ] functag
 [ ] funcenum

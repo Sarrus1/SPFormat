@@ -12,6 +12,7 @@ use super::{
         write_preproc_define, write_preproc_generic, write_preproc_include, write_preproc_undefine,
     },
     structs::{write_struct, write_struct_declaration},
+    typedefs::write_typedef,
     variables::write_global_variable,
     write_comment, write_node, Writer,
 };
@@ -30,6 +31,7 @@ pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf
             "function_definition" => write_function_definition(node, writer)?,
             "enum" => write_enum(node, writer)?,
             "enum_struct" => write_enum_struct(node, writer)?,
+            "typedef" => write_typedef(node, writer)?,
             "global_variable_declaration" => write_global_variable(node, writer)?,
             "preproc_include" | "preproc_tryinclude" => write_preproc_include(node, writer)?,
             "preproc_macro" | "preproc_define" => write_preproc_define(node, writer)?,

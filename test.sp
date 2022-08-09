@@ -13,6 +13,9 @@ native float operator*(float oper1, float oper2) = FloatMul;
 native float operator/(float oper1, float oper2) = FloatDiv;
 
 
+typedef SQLTxnFailure = function void(Database db, any data, int numQueries, const char[] error, int failIndex, any[] queryData);
+
+
 enum FOO(<<= 1.0)
 {
 	BIT1 = 1,

@@ -360,7 +360,7 @@ fn write_switch_case_values(node: Node, writer: &mut Writer) -> Result<(), Utf8E
             "symbol" => write_node(child, writer)?,
             "," => writer.output.push_str(", "),
             _ => {
-                if writer.is_literal(kind.to_string()) {
+                if writer.is_expression(kind.to_string()) {
                     write_expression(child, writer)?;
                 } else {
                     write_node(child, writer)?;

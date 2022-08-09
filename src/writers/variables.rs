@@ -12,7 +12,8 @@ pub fn write_global_variable(node: Node, writer: &mut Writer) -> Result<(), Utf8
     global_variable_declaration_break(&node, writer)?;
 
     for sub_node in node.children(&mut cursor) {
-        match sub_node.kind().borrow() {
+        let kind = sub_node.kind();
+        match kind.borrow() {
             "variable_storage_class" | "variable_visibility" | "type" => {
                 writer
                     .output
@@ -24,7 +25,8 @@ pub fn write_global_variable(node: Node, writer: &mut Writer) -> Result<(), Utf8
             }
             "variable_declaration" => write_variable_declaration(sub_node, writer)?,
             "," => writer.output.push_str(", "),
-            _ => println!("{}", sub_node.kind()),
+            ";" => continue,
+            _ => println!("Unexpected kind {} in write_global_variable.", kind),
         }
     }
     let next_node = node.next_sibling();

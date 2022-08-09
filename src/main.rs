@@ -65,6 +65,10 @@ fn main() -> Result<(), Utf8Error> {
     let source =
         fs::read_to_string(&filename).expect("Something went wrong while reading the file.");
     let output = format_string(&source, settings).unwrap();
+    if output.len() == 0 && source.trim().len() > 0 {
+        // An error occured, don't write to the file.
+        return Ok(());
+    }
     fs::write(&filename, output).expect("Something went wrong while writing the file.");
     Ok(())
 }
@@ -96,6 +100,10 @@ fn format_string_language(
 ) -> anyhow::Result<String> {
     let mut parser = parser::sourcepawn(&language)?;
     let parsed = parser.parse(&input, None)?.unwrap();
+    if parsed.root_node().has_error() {
+        // Do not try to format, there is an error in the syntax.
+        return Ok("".to_string());
+    }
     #[cfg(debug_assertions)]
     println!("{}", parsed.root_node().to_sexp());
     let mut writer = writers::Writer {

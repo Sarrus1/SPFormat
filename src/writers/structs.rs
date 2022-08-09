@@ -32,7 +32,8 @@ fn write_struct_constructor(node: Node, writer: &mut Writer) -> Result<(), Utf8E
     let mut cursor = node.walk();
 
     for sub_node in node.children(&mut cursor) {
-        match sub_node.kind().borrow() {
+        let kind = sub_node.kind();
+        match kind.borrow() {
             "comment" => {
                 writer.output.push('\t');
                 write_comment(sub_node, writer)?;
@@ -47,7 +48,8 @@ fn write_struct_constructor(node: Node, writer: &mut Writer) -> Result<(), Utf8E
                 writer.output.push('}');
             }
             ";" => writer.output.push(';'),
-            _ => println!("{}", sub_node.kind()),
+            "," => continue,
+            _ => println!("Unexpected kind {} in write_struct_constructor.", kind),
         }
     }
     if !writer.output.ends_with(';') {
@@ -123,7 +125,8 @@ fn write_struct_field(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
 
     let mut cursor = node.walk();
     for sub_node in node.children(&mut cursor) {
-        match sub_node.kind().borrow() {
+        let kind = sub_node.kind();
+        match kind.borrow() {
             "public" => writer.output.push_str("public "),
             "const" => writer.output.push_str("const "),
             "type" => write_node(sub_node, writer)?,
@@ -134,9 +137,7 @@ fn write_struct_field(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
             "fixed_dimension" => write_fixed_dimension(sub_node, writer)?,
             "dimension" => write_dimension(sub_node, writer)?,
             ";" => writer.output.push(';'),
-            _ => {
-                println!("{}", sub_node.kind())
-            }
+            _ => println!("Unexpected kind {} in write_struct_field.", kind),
         }
     }
 

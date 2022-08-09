@@ -498,9 +498,8 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-sourcepawn"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8beb867ff0be347a1d820c0aad94d1674fa36892fffe9092f7531bcd8e8b9952"
+version = "0.4.1"
+source = "git+https://github.com/Sarrus1/tree-sitter-sourcepawn#1823cdbedb22e89e8245bc9a692d4976f620bf07"
 dependencies = [
  "cc",
  "tree-sitter",

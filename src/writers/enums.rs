@@ -21,14 +21,16 @@ pub fn write_enum(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
         let kind = child.kind();
         match kind.borrow() {
             "enum" => writer.output.push_str("enum "),
-            "symbol" | ":" | "(" | ";" => write_node(child, writer)?,
-            ")" => writer.output.push_str(") "),
+            "symbol" | ":" | ";" => write_node(child, writer)?,
+            "(" => writer.output.push_str("("),
+            ")" => writer.output.push_str(")"),
             "enum_entries" => write_enum_entries(child, writer)?,
             _ => {
                 if writer.is_expression(kind.to_string()) {
                     write_expression(child, writer)?;
                 } else if kind.to_string().ends_with('=') {
                     write_node(child, writer)?;
+                    writer.output.push(' ');
                 } else {
                     println!("Unexpected kind {} in write_enum.", kind);
                 }

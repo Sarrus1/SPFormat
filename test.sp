@@ -5,8 +5,7 @@ using __intrinsics__.Handle;
 
 stock float operator++(float oper)
 {
-	return oper
-	+1.0;
+	return oper + 1.0;
 }
 
 
@@ -14,10 +13,10 @@ native float operator*(float oper1, float oper2) = FloatMul;
 native float operator/(float oper1, float oper2) = FloatDiv;
 
 
-enum (<<=1.0) 
+enum FOO(<<= 1.0)
 {
 	BIT1 = 1,
-	BIT2,
+	BIT2 = 4,
 	BIT3,
 	BIT4,
 }

@@ -3,7 +3,7 @@ import init from "../../pkg/sp_format";
 import { Settings } from "./interfaces";
 import Editor from "@monaco-editor/react";
 import Header from "./components/Header";
-import SettingsPanel from "./components/settingspanel";
+import SettingsPanel from "./components/SettingsPanel";
 import "./App.css";
 import { defaultCode } from "./text";
 import { makeDefaultSettings } from "./utils";

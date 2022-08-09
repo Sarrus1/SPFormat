@@ -45,6 +45,33 @@ enum FOO(<<= 1.0)
 	BIT4,
 }
 
+methodmap EmbedFooter < JSONObject
+{
+	/**
+	 * Constructor for the EmbedFooter methodmap.
+	 * 
+	 * @param text			Text of the footer.
+	 * @return					Returns the EmbedFooter.
+	 */
+	public EmbedFooter(const char[] text="") 
+	{
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.SetString("text", text);
+		return view_as<EmbedFooter>(jsonObject);
+	}
+
+	/**
+	 * Retrieve the text of the footer.
+	 * 
+	 * @param buffer				String buffer to store value.
+	 * @param maxlength			Maximum length of the string buffer.
+	 * @return							True on success. False otherwise.
+	 */
+	public bool GetText(char[] buffer, int maxlength)
+	{
+		return this.GetString("text", buffer, maxlength);
+	}
+}
 
 void OnPluginStart()
 {

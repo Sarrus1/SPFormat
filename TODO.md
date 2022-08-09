@@ -10,7 +10,7 @@
 [X] typeset
 [X] functag
 [X] funcenum
-[ ] methodmap
+[X] methodmap
 [X] struct
 [X] struct_declaration
 [X] global_variable_declaration

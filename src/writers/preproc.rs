@@ -69,24 +69,21 @@ pub fn break_after_statement(node: &Node, writer: &mut Writer) {
 pub fn write_preproc_define(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
 
-    for sub_node in node.children(&mut cursor) {
-        match sub_node.kind().borrow() {
-            "symbol" => write_node(&sub_node, writer)?,
+    for child in node.children(&mut cursor) {
+        let kind = child.kind();
+        match kind.borrow() {
+            "#define" => writer.output.push_str("#define "),
+            "symbol" => write_node(&child, writer)?,
             "preproc_arg" => {
                 writer.output.push(' ');
-                write_preproc_arg(sub_node, writer)?;
+                write_preproc_arg(child, writer)?;
             }
-            "comment" => {
-                writer.output.push('\t');
-                write_comment(sub_node, writer)?;
-            }
-            "#define" => writer.output.push_str("#define "),
-            "\n" | _ => {}
+            "\n" => continue,
+            _ => println!("Unexpected kind {} in write_preproc_define.", kind),
         }
     }
-    if !writer.output.ends_with('\n') {
-        writer.breakl();
-    }
+
+    break_after_statement(&node, writer);
 
     Ok(())
 }

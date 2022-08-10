@@ -23,7 +23,7 @@ use crate::writers::source_file::write_source_file;
 #[clap(author, version, about, long_about = None)]
 pub struct Args {
     /// The file to format.
-    #[clap(short, long, value_parser)]
+    #[clap(value_parser)]
     file: String,
 
     /// Number of empty lines to insert before a function declaration.
@@ -83,6 +83,8 @@ fn main() -> Result<(), Utf8Error> {
     let output = format_string(&source, settings).unwrap();
     if output.len() == 0 && source.trim().len() > 0 {
         // An error occured, don't write to the file.
+        println!("Press any key to exit...");
+        std::io::stdin().read_line(&mut String::new()).unwrap();
         return Ok(());
     }
     fs::write(&filename, output).expect("Something went wrong while writing the file.");

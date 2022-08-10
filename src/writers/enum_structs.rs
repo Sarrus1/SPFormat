@@ -22,10 +22,10 @@ pub fn write_enum_struct(node: Node, writer: &mut Writer) -> Result<(), Utf8Erro
         let kind = child.kind();
         match kind.borrow() {
             "enum" | "struct" => {
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
                 writer.output.push(' ')
             }
-            "symbol" => write_node(child, writer)?,
+            "symbol" => write_node(&child, writer)?,
             "{" => {
                 if writer.settings.brace_wrapping_before_enum_struct {
                     writer.breakl();
@@ -73,9 +73,9 @@ fn write_enum_struct_field(node: Node, writer: &mut Writer) -> Result<(), Utf8Er
         let kind = child.kind();
         match kind.borrow() {
             "type" => write_type(child, writer, true)?,
-            "symbol" => write_node(child, writer)?,
+            "symbol" => write_node(&child, writer)?,
             "fixed_dimension" => write_fixed_dimension(child, writer)?,
-            ";" => write_node(child, writer)?,
+            ";" => write_node(&child, writer)?,
             _ => {
                 println!("Unexpected kind {} in write_enum_struct_field.", kind);
             }
@@ -103,7 +103,7 @@ fn write_enum_struct_method(node: Node, writer: &mut Writer) -> Result<(), Utf8E
         let kind = child.kind();
         match kind.borrow() {
             "type" => write_type(child, writer, true)?,
-            "symbol" => write_node(child, writer)?,
+            "symbol" => write_node(&child, writer)?,
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "block" => {
                 if writer.settings.brace_wrapping_before_function {

@@ -33,7 +33,7 @@ pub fn write_alias_declaration(node: Node, writer: &mut Writer) -> Result<(), Ut
             "type" => write_type(child, writer, true)?,
             "old_type" => write_old_type(child, writer)?,
             "dimension" => write_dimension(child, writer)?,
-            "alias_operator" | "operator" => write_node(child, writer)?,
+            "alias_operator" | "operator" => write_node(&child, writer)?,
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "block" => {
                 if writer.settings.brace_wrapping_before_function {
@@ -79,10 +79,10 @@ pub fn write_alias_assignment(node: Node, writer: &mut Writer) -> Result<(), Utf
             "function_definition_type" => write_function_visibility(child, writer)?,
             "type" => write_type(child, writer, true)?,
             "old_type" => write_old_type(child, writer)?,
-            "symbol" => write_node(child, writer)?,
+            "symbol" => write_node(&child, writer)?,
             "dimension" => write_dimension(child, writer)?,
             "=" => writer.output.push_str(" = "),
-            "alias_operator" | "operator" => write_node(child, writer)?,
+            "alias_operator" | "operator" => write_node(&child, writer)?,
             "argument_declarations" => write_argument_declarations(child, writer)?,
             ";" => writer.output.push(';'),
             _ => {

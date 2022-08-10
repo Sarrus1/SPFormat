@@ -25,7 +25,7 @@ pub fn write_functag(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
             "public" => writer.output.push_str("public"),
             "old_type" => write_old_type(child, writer)?,
             "symbol" => {
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
                 writer.output.push(' ')
             }
             "argument_declarations" => write_argument_declarations(child, writer)?,
@@ -56,7 +56,7 @@ pub fn write_funcenum(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
         let kind = child.kind();
         match kind.borrow() {
             "funcenum" => writer.output.push_str("funcenum "),
-            "symbol" => write_node(child, writer)?,
+            "symbol" => write_node(&child, writer)?,
             "{" => {
                 if writer.settings.brace_wrapping_before_funcenum {
                     writer.breakl();

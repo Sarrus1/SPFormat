@@ -10,7 +10,7 @@ pub fn write_struct_declaration(node: Node, writer: &mut Writer) -> Result<(), U
     for sub_node in node.children(&mut cursor) {
         match sub_node.kind().borrow() {
             "public" | "symbol" => {
-                write_node(sub_node, writer)?;
+                write_node(&sub_node, writer)?;
                 writer.output.push(' ');
             }
             "comment" => {
@@ -74,10 +74,10 @@ fn write_struct_field_value(node: Node, writer: &mut Writer) -> Result<(), Utf8E
                     writer
                         .output
                         .push_str(writer.indent_string.repeat(writer.indent).as_str());
-                    write_node(sub_node, writer)?;
+                    write_node(&sub_node, writer)?;
                 } else {
                     key = true;
-                    write_node(sub_node, writer)?;
+                    write_node(&sub_node, writer)?;
                     writer.output.push_str(",\n");
                 }
             }
@@ -101,7 +101,7 @@ pub fn write_struct(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
                 write_comment(sub_node, writer)?;
             }
             "struct" => writer.output.push_str("struct "),
-            "symbol" => write_node(sub_node, writer)?,
+            "symbol" => write_node(&sub_node, writer)?,
             "{" => {
                 writer.indent += 1;
                 writer.output.push_str("\n{\n");
@@ -129,10 +129,10 @@ fn write_struct_field(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
         match kind.borrow() {
             "public" => writer.output.push_str("public "),
             "const" => writer.output.push_str("const "),
-            "type" => write_node(sub_node, writer)?,
+            "type" => write_node(&sub_node, writer)?,
             "symbol" => {
                 writer.output.push(' ');
-                write_node(sub_node, writer)?;
+                write_node(&sub_node, writer)?;
             }
             "fixed_dimension" => write_fixed_dimension(sub_node, writer)?,
             "dimension" => write_dimension(sub_node, writer)?,

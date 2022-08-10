@@ -1,9 +1,9 @@
 use crate::settings::Settings;
 
-use self::expressions::write_expression;
+use self::{expressions::write_expression, preproc::break_after_statement};
 
 use std::{borrow::Borrow, collections::HashSet, str::Utf8Error};
-use tree_sitter::{Language, Node};
+use tree_sitter::{Language, Node, Point};
 
 pub mod alias;
 pub mod enum_structs;
@@ -77,8 +77,9 @@ pub fn write_comment(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
             }
         }
     }
-    write_node(node, writer)?;
-    writer.breakl();
+    write_node(&node, writer)?;
+
+    break_after_statement(&node, writer);
 
     Ok(())
 }
@@ -88,9 +89,9 @@ fn write_dynamic_array(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         match child.kind().borrow() {
-            "type" => write_node(child, writer)?,
+            "type" => write_node(&child, writer)?,
             // TODO: Handle different cases here.
-            _ => write_node(child, writer)?,
+            _ => write_node(&child, writer)?,
         }
     }
 
@@ -121,7 +122,7 @@ fn write_fixed_dimension(node: Node, writer: &mut Writer) -> Result<(), Utf8Erro
     Ok(())
 }
 
-fn write_node(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+fn write_node(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     writer
         .output
         .push_str(node.utf8_text(writer.source)?.borrow());
@@ -143,4 +144,20 @@ fn prev_sibling_kind(node: &Node) -> String {
         return String::from("");
     }
     return String::from(prev_node.unwrap().kind());
+}
+
+fn next_sibling_start(node: &Node) -> Option<Point> {
+    let next_node = node.next_sibling();
+    if next_node.is_none() {
+        return None;
+    }
+    return Some(next_node.unwrap().start_position());
+}
+
+fn prev_sibling_end(node: &Node) -> Option<Point> {
+    let prev_node = node.prev_sibling();
+    if prev_node.is_none() {
+        return None;
+    }
+    return Some(prev_node.unwrap().end_position());
 }

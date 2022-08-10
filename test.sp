@@ -1,3 +1,6 @@
+#include <sourcemod>	/** */
+#tryinclude "fo"	// foo
+
 static_assert(true, "This is an assertion error");
 assert(true, "This is an assertion error");
 using __intrinsics__.Handle;

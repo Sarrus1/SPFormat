@@ -23,7 +23,7 @@ pub fn write_typedef(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
         let kind = child.kind();
         match kind.borrow() {
             "typedef" => writer.output.push_str("typedef "),
-            "symbol" => write_node(child, writer)?,
+            "symbol" => write_node(&child, writer)?,
             "=" => writer.output.push_str(" = "),
             "typedef_expression" => write_typedef_expression(child, writer)?,
             ";" => continue,
@@ -53,7 +53,7 @@ pub fn write_typeset(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
         let kind = child.kind();
         match kind.borrow() {
             "typeset" => writer.output.push_str("typeset "),
-            "symbol" => write_node(child, writer)?,
+            "symbol" => write_node(&child, writer)?,
             "{" => {
                 if writer.settings.brace_wrapping_before_typeset {
                     writer.breakl();

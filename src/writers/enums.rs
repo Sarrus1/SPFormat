@@ -21,7 +21,7 @@ pub fn write_enum(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
         let kind = child.kind();
         match kind.borrow() {
             "enum" => writer.output.push_str("enum "),
-            "symbol" | ":" | ";" => write_node(child, writer)?,
+            "symbol" | ":" | ";" => write_node(&child, writer)?,
             "(" => writer.output.push_str("("),
             ")" => writer.output.push_str(")"),
             "enum_entries" => write_enum_entries(child, writer)?,
@@ -29,7 +29,7 @@ pub fn write_enum(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
                 if writer.is_expression(kind.to_string()) {
                     write_expression(child, writer)?;
                 } else if kind.to_string().ends_with('=') {
-                    write_node(child, writer)?;
+                    write_node(&child, writer)?;
                     writer.output.push(' ');
                 } else {
                     println!("Unexpected kind {} in write_enum.", kind);
@@ -69,7 +69,7 @@ fn write_enum_entries(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
                 } else if kind.to_string().ends_with('=') {
                     // Match all in place operators, write it, and add a space
                     // to respect the rest of the styling.
-                    write_node(child, writer)?;
+                    write_node(&child, writer)?;
                     writer.output.push(' ');
                 } else {
                     println!("Unexpected kind {} in write_enum_entries.", kind);
@@ -89,7 +89,7 @@ fn write_enum_entry(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "builtin_type" | "symbol" => write_node(child, writer)?,
+            "builtin_type" | "symbol" => write_node(&child, writer)?,
             ":" => writer.output.push_str(": "),
             "fixed_dimension" => write_fixed_dimension(child, writer)?,
             "=" => writer.output.push_str(" = "),

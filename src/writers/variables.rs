@@ -87,7 +87,7 @@ fn global_variable_declaration_break(node: &Node, writer: &mut Writer) -> Result
 pub fn write_type(node: Node, writer: &mut Writer, insert_space: bool) -> Result<(), Utf8Error> {
     let next_kind = next_sibling_kind(&node);
 
-    write_node(node, writer)?;
+    write_node(&node, writer)?;
     if insert_space && next_kind != "dimension" && next_kind != "fixed_dimension" {
         writer.output.push(' ')
     };
@@ -114,7 +114,7 @@ pub fn write_variable_declaration_statement(
             "comment" => write_comment(child, writer)?,
             ";" => writer.output.push(';'),
             "," => writer.output.push_str(", "),
-            _ => write_node(child, writer)?,
+            _ => write_node(&child, writer)?,
         }
     }
 
@@ -139,14 +139,14 @@ pub fn write_old_variable_declaration_statement(
         match child.kind().borrow() {
             "variable_storage_class" => write_variable_storage_class(child, writer)?,
             "new" | "decl" => {
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
                 writer.output.push(' ');
             }
             "old_variable_declaration" => write_old_variable_declaration(child, writer)?,
             "comment" => write_comment(child, writer)?,
             ";" => writer.output.push(';'),
             "," => writer.output.push_str(", "),
-            _ => write_node(child, writer)?,
+            _ => write_node(&child, writer)?,
         }
     }
 
@@ -168,7 +168,7 @@ fn write_old_variable_declaration(node: Node, writer: &mut Writer) -> Result<(),
             "old_type" => write_old_type(child, writer)?,
             "dimension" => write_dimension(child, writer)?,
             "fixed_dimension" => write_fixed_dimension(child, writer)?,
-            "symbol" => write_node(child, writer)?,
+            "symbol" => write_node(&child, writer)?,
             _ => continue,
         }
     }
@@ -192,10 +192,10 @@ fn write_variable_storage_class(node: Node, writer: &mut Writer) -> Result<(), U
     for sub_node in node.children(&mut cursor) {
         match sub_node.kind().borrow() {
             "const" | "static" => {
-                write_node(sub_node, writer)?;
+                write_node(&sub_node, writer)?;
                 writer.output.push(' ');
             }
-            _ => write_node(sub_node, writer)?,
+            _ => write_node(&sub_node, writer)?,
         }
     }
 

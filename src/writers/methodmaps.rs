@@ -26,7 +26,7 @@ pub fn write_methodmap(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
         let kind = child.kind();
         match kind.borrow() {
             "methodmap" => writer.output.push_str("methodmap "),
-            "symbol" => write_node(child, writer)?,
+            "symbol" => write_node(&child, writer)?,
             "<" => writer.output.push_str(" < "),
             "__nullable__" => writer.output.push_str(" __nullable__ "),
             "{" => {
@@ -80,7 +80,7 @@ fn write_methodmap_alias(node: Node, writer: &mut Writer) -> Result<(), Utf8Erro
         let kind = child.kind();
         match kind.borrow() {
             "public" => writer.output.push_str("public "),
-            "~" | "(" | ")" | "symbol" => write_node(child, writer)?,
+            "~" | "(" | ")" | "symbol" => write_node(&child, writer)?,
             "=" => writer.output.push_str(" = "),
             ";" => continue,
             _ => println!("Unexpected kind {} in write_alias_declaration.", kind),
@@ -110,11 +110,11 @@ fn write_methodmap_native(node: Node, writer: &mut Writer) -> Result<(), Utf8Err
         match kind.borrow() {
             "public" => writer.output.push_str("public "),
             "static" | "native" => {
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
                 writer.output.push(' ');
             }
             "type" => write_type(child, writer, true)?,
-            "(" | ")" | "symbol" | "~" => write_node(child, writer)?,
+            "(" | ")" | "symbol" | "~" => write_node(&child, writer)?,
             "=" => writer.output.push_str(" = "),
             "argument_declarations" => write_argument_declarations(child, writer)?,
             ";" => continue,
@@ -145,11 +145,11 @@ fn write_methodmap_method(node: Node, writer: &mut Writer) -> Result<(), Utf8Err
         match kind.borrow() {
             "public" => writer.output.push_str("public "),
             "static" => {
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
                 writer.output.push(' ');
             }
             "type" => write_type(child, writer, true)?,
-            "(" | ")" | "symbol" | "~" => write_node(child, writer)?,
+            "(" | ")" | "symbol" | "~" => write_node(&child, writer)?,
             "=" => writer.output.push_str(" = "),
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "block" => {
@@ -186,11 +186,11 @@ fn write_methodmap_property(node: Node, writer: &mut Writer) -> Result<(), Utf8E
         let kind = child.kind();
         match kind.borrow() {
             "property" => {
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
                 writer.output.push(' ');
             }
             "type" => write_type(child, writer, true)?,
-            "(" | ")" | "symbol" | "~" => write_node(child, writer)?,
+            "(" | ")" | "symbol" | "~" => write_node(&child, writer)?,
             "{" => {
                 if writer.settings.brace_wrapping_before_methodmap_property {
                     writer.breakl();
@@ -238,7 +238,7 @@ fn write_methodmap_property_alias(node: Node, writer: &mut Writer) -> Result<(),
         match kind.borrow() {
             "public" => writer.output.push_str("public "),
             "methodmap_property_getter" => writer.output.push_str("get()"),
-            "symbol" => write_node(child, writer)?,
+            "symbol" => write_node(&child, writer)?,
             "=" => writer.output.push_str(" = "),
             ";" => continue,
             _ => println!(
@@ -271,12 +271,12 @@ fn write_methodmap_property_method(node: Node, writer: &mut Writer) -> Result<()
         match kind.borrow() {
             "public" => writer.output.push_str("public "),
             "native" => {
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
                 writer.output.push(' ');
             }
             "methodmap_property_getter" => writer.output.push_str("get()"),
             "methodmap_property_setter" => write_methodmap_property_setter(child, writer)?,
-            "symbol" => write_node(child, writer)?,
+            "symbol" => write_node(&child, writer)?,
             "=" => writer.output.push_str(" = "),
             "block" => {
                 if writer.settings.brace_wrapping_before_function {
@@ -306,7 +306,7 @@ fn write_methodmap_property_setter(node: Node, writer: &mut Writer) -> Result<()
         let kind = child.kind();
         match kind.borrow() {
             "set" => writer.output.push_str("set"),
-            "symbol" | "(" | ")" => write_node(child, writer)?,
+            "symbol" | "(" | ")" => write_node(&child, writer)?,
             "type" => write_type(child, writer, true)?,
             ";" => continue,
             _ => println!(

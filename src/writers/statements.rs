@@ -52,7 +52,7 @@ pub fn write_statement(
             }
             write_expression_statement(node, writer)?
         }
-        _ => write_node(node, writer)?,
+        _ => write_node(&node, writer)?,
     }
     if do_break {
         // Add another break if the next sibling is not right below/next
@@ -79,12 +79,12 @@ fn write_for_loop(node: Node, writer: &mut Writer, do_indent: bool) -> Result<()
                 if do_indent {
                     writer.write_indent();
                 }
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
             }
-            "(" => write_node(child, writer)?,
+            "(" => write_node(&child, writer)?,
             ")" => {
                 end_condition_reached = true;
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
             }
             "assignment_expression" => write_expression(child, writer)?,
             ";" => writer.output.push(';'),
@@ -118,7 +118,7 @@ fn write_for_loop(node: Node, writer: &mut Writer, do_indent: bool) -> Result<()
                     }
                     write_expression(child, writer)?;
                 } else {
-                    write_node(child, writer)?;
+                    write_node(&child, writer)?;
                 }
             }
         }
@@ -137,12 +137,12 @@ fn write_while_loop(node: Node, writer: &mut Writer, do_indent: bool) -> Result<
                 if do_indent {
                     writer.write_indent();
                 }
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
             }
-            "(" => write_node(child, writer)?,
+            "(" => write_node(&child, writer)?,
             ")" => {
                 end_condition_reached = true;
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
             }
             _ => {
                 if writer.is_statement(kind.to_string()) {
@@ -170,7 +170,7 @@ fn write_while_loop(node: Node, writer: &mut Writer, do_indent: bool) -> Result<
                     }
                     write_expression(child, writer)?;
                 } else {
-                    write_node(child, writer)?;
+                    write_node(&child, writer)?;
                 }
             }
         }
@@ -196,9 +196,9 @@ fn write_do_while_loop(node: Node, writer: &mut Writer, do_indent: bool) -> Resu
                 writer.write_indent();
                 writer.output.push_str("while");
             }
-            "(" => write_node(child, writer)?,
+            "(" => write_node(&child, writer)?,
             ")" => {
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
             }
             _ => {
                 if writer.is_statement(kind.to_string()) {
@@ -227,7 +227,7 @@ fn write_do_while_loop(node: Node, writer: &mut Writer, do_indent: bool) -> Resu
                     }
                     write_expression(child, writer)?;
                 } else {
-                    write_node(child, writer)?;
+                    write_node(&child, writer)?;
                 }
             }
         }
@@ -251,9 +251,9 @@ fn write_switch_statement(
                 }
                 writer.output.push_str("switch");
             }
-            "(" => write_node(child, writer)?,
+            "(" => write_node(&child, writer)?,
             ")" => {
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
             }
             "{" => {
                 if writer.settings.brace_wrapping_before_condition {
@@ -277,7 +277,7 @@ fn write_switch_statement(
                 if writer.is_expression(kind.to_string()) {
                     write_expression(child, writer)?;
                 } else {
-                    write_node(child, writer)?;
+                    write_node(&child, writer)?;
                 }
             }
         }
@@ -293,7 +293,7 @@ fn write_switch_case(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
         match kind.borrow() {
             "case" => {
                 writer.write_indent();
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
                 writer.output.push(' ');
             }
             ":" => {
@@ -311,7 +311,7 @@ fn write_switch_case(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
                     write_statement(child, writer, true, true)?;
                     writer.indent -= 1;
                 } else {
-                    write_node(child, writer)?;
+                    write_node(&child, writer)?;
                 }
             }
         }
@@ -327,7 +327,7 @@ fn write_switch_default_case(node: Node, writer: &mut Writer) -> Result<(), Utf8
         match kind.borrow() {
             "default" => {
                 writer.write_indent();
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
             }
             ":" => {
                 writer.output.push_str(":\n");
@@ -342,7 +342,7 @@ fn write_switch_default_case(node: Node, writer: &mut Writer) -> Result<(), Utf8
                     write_statement(child, writer, true, true)?;
                     writer.indent -= 1;
                 } else {
-                    write_node(child, writer)?
+                    write_node(&child, writer)?
                 }
             }
         }
@@ -357,13 +357,13 @@ fn write_switch_case_values(node: Node, writer: &mut Writer) -> Result<(), Utf8E
         let kind = child.kind();
         match kind.borrow() {
             "comment" => write_comment(child, writer)?,
-            "symbol" => write_node(child, writer)?,
+            "symbol" => write_node(&child, writer)?,
             "," => writer.output.push_str(", "),
             _ => {
                 if writer.is_expression(kind.to_string()) {
                     write_expression(child, writer)?;
                 } else {
-                    write_node(child, writer)?;
+                    write_node(&child, writer)?;
                 }
             }
         }
@@ -393,7 +393,7 @@ fn write_return_statement(
                 if writer.is_expression(kind.to_string()) {
                     write_expression(child, writer)?;
                 } else {
-                    write_node(child, writer)?
+                    write_node(&child, writer)?
                 }
             }
         }
@@ -423,7 +423,7 @@ fn write_delete_statement(
                 if writer.is_expression(kind.to_string()) {
                     write_expression(child, writer)?;
                 } else {
-                    write_node(child, writer)?
+                    write_node(&child, writer)?
                 }
             }
         }
@@ -442,7 +442,7 @@ fn write_expression_statement(node: Node, writer: &mut Writer) -> Result<(), Utf
                 if writer.is_expression(kind.to_string()) {
                     write_expression(child, writer)?;
                 } else {
-                    write_node(child, writer)?
+                    write_node(&child, writer)?
                 }
             }
         }
@@ -468,18 +468,18 @@ fn write_condition_statement(
                 } else if do_indent {
                     writer.write_indent();
                 }
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
             }
             "else" => {
                 writer.breakl();
                 writer.write_indent();
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
                 out_of_condition = true;
                 else_statement = true;
             }
-            "(" => write_node(child, writer)?,
+            "(" => write_node(&child, writer)?,
             ")" => {
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
                 out_of_condition = true;
             }
             _ => {
@@ -512,7 +512,7 @@ fn write_condition_statement(
                     }
                     write_expression(child, writer)?;
                 } else {
-                    write_node(child, writer)?;
+                    write_node(&child, writer)?;
                 }
             }
         }
@@ -531,21 +531,21 @@ pub fn write_block(node: Node, writer: &mut Writer, do_indent: bool) -> Result<(
                 if do_indent {
                     writer.write_indent();
                 }
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
                 writer.breakl();
                 writer.indent += 1;
             }
             "}" => {
                 writer.indent -= 1;
                 writer.write_indent();
-                write_node(child, writer)?;
+                write_node(&child, writer)?;
             }
             "comment" => write_comment(child, writer)?,
             _ => {
                 if writer.is_statement(kind.to_string()) {
                     write_statement(child, writer, true, true)?
                 } else {
-                    write_node(child, writer)?
+                    write_node(&child, writer)?
                 }
             }
         }

@@ -6,7 +6,7 @@ use tree_sitter::Node;
 pub fn write_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     match node.kind().borrow() {
         "symbol" | "null" | "this" | "int_literal " | "bool_literal" | "char_literal"
-        | "float_literal" | "string_literal" => write_node(node, writer)?,
+        | "float_literal" | "string_literal" => write_node(&node, writer)?,
         "binary_expression" => write_binary_expression(node, writer)?,
         "unary_expression" => write_unary_expression(node, writer)?,
         "update_expression" => write_update_expression(node, writer)?,
@@ -24,7 +24,7 @@ pub fn write_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Error
         "assignment_expression" => write_assignment_expression(node, writer)?,
         "array_literal" => write_array_literal(node, writer)?,
         "sizeof_expression" => write_sizeof_expression(node, writer)?,
-        _ => write_node(node, writer)?,
+        _ => write_node(&node, writer)?,
     };
 
     Ok(())
@@ -33,7 +33,7 @@ pub fn write_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Error
 fn write_binary_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     write_expression(node.child_by_field_name("left").unwrap(), writer)?;
     writer.output.push(' ');
-    write_node(node.child_by_field_name("operator").unwrap(), writer)?;
+    write_node(&node.child_by_field_name("operator").unwrap(), writer)?;
     writer.output.push(' ');
     write_expression(node.child_by_field_name("right").unwrap(), writer)?;
 
@@ -59,7 +59,7 @@ pub fn write_old_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
 fn write_assignment_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     write_expression(node.child_by_field_name("left").unwrap(), writer)?;
     writer.output.push(' ');
-    write_node(node.child_by_field_name("operator").unwrap(), writer)?;
+    write_node(&node.child_by_field_name("operator").unwrap(), writer)?;
     writer.output.push(' ');
     let right_node = node.child_by_field_name("right").unwrap();
     match right_node.kind().borrow() {
@@ -75,7 +75,7 @@ fn write_array_indexed_access(node: Node, writer: &mut Writer) -> Result<(), Utf
     match array_node.kind().borrow() {
         "array_indexed_access" => write_array_indexed_access(array_node, writer)?,
         // TODO: Handle "field_access" here.
-        _ => write_node(array_node, writer)?,
+        _ => write_node(&array_node, writer)?,
     }
     writer.output.push('[');
     write_expression(node.child_by_field_name("index").unwrap(), writer)?;
@@ -87,14 +87,14 @@ fn write_array_indexed_access(node: Node, writer: &mut Writer) -> Result<(), Utf
 fn write_field_access(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     write_expression(node.child_by_field_name("target").unwrap(), writer)?;
     writer.output.push('.');
-    write_node(node.child_by_field_name("field").unwrap(), writer)?;
+    write_node(&node.child_by_field_name("field").unwrap(), writer)?;
 
     Ok(())
 }
 
 fn write_new_instance(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     writer.output.push_str("new ");
-    write_node(node.child_by_field_name("class").unwrap(), writer)?;
+    write_node(&node.child_by_field_name("class").unwrap(), writer)?;
     write_function_call_arguments(node.child_by_field_name("arguments").unwrap(), writer)?;
 
     Ok(())
@@ -109,7 +109,7 @@ fn write_function_call(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
 }
 
 fn write_unary_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    write_node(node.child_by_field_name("operator").unwrap(), writer)?;
+    write_node(&node.child_by_field_name("operator").unwrap(), writer)?;
     write_expression(node.child_by_field_name("argument").unwrap(), writer)?;
 
     Ok(())
@@ -137,12 +137,12 @@ fn write_comma_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Err
 }
 
 fn write_concatenated_string(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    write_node(node.child_by_field_name("left").unwrap(), writer)?;
+    write_node(&node.child_by_field_name("left").unwrap(), writer)?;
     writer.output.push_str(" ... ");
     let right_node = node.child_by_field_name("right").unwrap();
     match right_node.kind().borrow() {
         "concatenated_string" => write_concatenated_string(right_node, writer)?,
-        _ => write_node(right_node, writer)?,
+        _ => write_node(&right_node, writer)?,
     }
 
     Ok(())
@@ -152,11 +152,11 @@ fn write_update_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Er
     let argument_node = node.child_by_field_name("argument").unwrap();
     let operator_node = node.child_by_field_name("operator").unwrap();
     if operator_node.end_position() <= argument_node.start_position() {
-        write_node(operator_node, writer)?;
+        write_node(&operator_node, writer)?;
         write_expression(argument_node, writer)?;
     } else {
         write_expression(argument_node, writer)?;
-        write_node(operator_node, writer)?;
+        write_node(&operator_node, writer)?;
     }
 
     Ok(())
@@ -182,7 +182,7 @@ fn write_scope_access(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
 
 fn write_view_as(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     writer.output.push_str("view_as<");
-    write_node(node.child_by_field_name("type").unwrap(), writer)?;
+    write_node(&node.child_by_field_name("type").unwrap(), writer)?;
     writer.output.push_str(">(");
     write_expression(node.child_by_field_name("value").unwrap(), writer)?;
     writer.output.push(')');
@@ -231,14 +231,14 @@ pub fn write_function_call_arguments(node: Node, writer: &mut Writer) -> Result<
                 writer.output.push(')')
             }
             "," => writer.output.push_str(", "),
-            "symbol" | "ignore_argument" => write_node(child, writer)?,
+            "symbol" | "ignore_argument" => write_node(&child, writer)?,
             "named_arg" => write_named_arg(child, writer)?,
             _ => {
                 let kind = child.kind();
                 if writer.is_expression(kind.to_string()) {
                     write_expression(child, writer)?
                 } else {
-                    write_node(child, writer)?;
+                    write_node(&child, writer)?;
                 }
             }
         }
@@ -249,10 +249,10 @@ pub fn write_function_call_arguments(node: Node, writer: &mut Writer) -> Result<
 
 fn write_named_arg(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     writer.output.push('.');
-    write_node(node.child_by_field_name("name").unwrap(), writer)?;
+    write_node(&node.child_by_field_name("name").unwrap(), writer)?;
     writer.output.push_str(" = ");
     // FIXME: Always write_node.
-    write_node(node.child_by_field_name("value").unwrap(), writer)?;
+    write_node(&node.child_by_field_name("value").unwrap(), writer)?;
 
     Ok(())
 }

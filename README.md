@@ -1,8 +1,16 @@
-# SPFormat
-
-Opinionated SourcePawn code formatter, for the new and the old syntax, written in Rust.
-
-[![Build](https://github.com/Sarrus1/SPFormat/actions/workflows/release.yml/badge.svg)](https://github.com/Sarrus1/SPFormat/actions/workflows/release.yml)
+<div align="center">
+  <h1><code>SPFormat</code></h1>
+  <p>
+    <strong>Opinionated SourcePawn code formatter, for the new and the old syntax, written in Rust.
+    </strong>
+  </p>
+  <p style="margin-bottom: 0.5ex;">
+    <a href="https://github.com/Sarrus1/SPFormat/actions/workflows/release.yml"><img
+        src="https://github.com/Sarrus1/SPFormat/actions/workflows/release.yml/badge.svg"
+        />
+    </a>
+  </p>
+</div>
 
 ## Try the [playground](https://sarrus1.github.io/SPFormat/)!
 

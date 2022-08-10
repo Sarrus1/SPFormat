@@ -101,7 +101,7 @@ fn write_dynamic_array(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
 fn write_dimension(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let next_kind = next_sibling_kind(&node);
     writer.output.push_str("[]");
-    if next_kind != "dimension" && next_kind != "fixed_dimension" {
+    if next_kind != "" && next_kind != "dimension" && next_kind != "fixed_dimension" {
         writer.output.push(' ')
     };
 

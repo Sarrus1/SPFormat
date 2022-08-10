@@ -15,7 +15,7 @@ use super::{
     },
     structs::{write_struct, write_struct_declaration},
     typedefs::{write_typedef, write_typeset},
-    variables::write_global_variable,
+    variables::{write_global_variable, write_old_global_variable_declaration},
     write_comment, write_node, Writer,
 };
 
@@ -41,6 +41,9 @@ pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf
             "struct" => write_struct(node, writer)?,
             "struct_declaration" => write_struct_declaration(node, writer)?,
             "global_variable_declaration" => write_global_variable(node, writer)?,
+            "old_global_variable_declaration" => {
+                write_old_global_variable_declaration(&node, writer)?
+            }
             "preproc_include" | "preproc_tryinclude" => write_preproc_include(node, writer)?,
             "preproc_macro" | "preproc_define" => write_preproc_define(node, writer)?,
             "preproc_undefine" => write_preproc_undefine(node, writer)?,

@@ -50,6 +50,37 @@ pub fn write_global_variable(node: Node, writer: &mut Writer) -> Result<(), Utf8
     Ok(())
 }
 
+pub fn write_old_global_variable_declaration(
+    node: &Node,
+    writer: &mut Writer,
+) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+
+    for child in node.children(&mut cursor) {
+        let kind = child.kind();
+        match kind.borrow() {
+            "variable_storage_class" | "variable_visibility" | "new" | "decl" => {
+                write_node(&child, writer)?;
+                writer.output.push(' ');
+            }
+            "comment" => {
+                write_comment(child, writer)?;
+            }
+            "old_variable_declaration" => write_old_variable_declaration(child, writer)?,
+            "," => writer.output.push_str(", "),
+            ";" => continue,
+            _ => println!(
+                "Unexpected kind {} in write_old_global_variable_declaration.",
+                kind
+            ),
+        }
+    }
+    writer.output.push(';');
+    writer.breakl();
+
+    Ok(())
+}
+
 fn global_variable_declaration_break(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let prev_node = node.prev_sibling();
 
@@ -162,25 +193,26 @@ pub fn write_old_variable_declaration_statement(
 
 fn write_old_variable_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
-    // Write the dimensions of a declaration, if they exist.
-    for child in node.named_children(&mut cursor) {
-        match child.kind().borrow() {
+
+    for child in node.children(&mut cursor) {
+        let kind = child.kind();
+        match kind.borrow() {
             "old_type" => write_old_type(child, writer)?,
             "dimension" => write_dimension(child, writer)?,
             "fixed_dimension" => write_fixed_dimension(child, writer)?,
             "symbol" => write_node(&child, writer)?,
-            _ => continue,
+            "=" => writer.output.push_str(" = "),
+            _ => {
+                if writer.is_expression(kind.to_string()) {
+                    write_expression(child, writer)?;
+                } else {
+                    println!(
+                        "Unexpected kind {} in write_old_variable_declaration.",
+                        kind
+                    )
+                }
+            }
         }
-    }
-
-    // Write the default value of a declaration, if it exists.
-    for child in node.children_by_field_name("initialValue", &mut cursor) {
-        if child.kind().to_string() == "=" {
-            writer.output.push_str(" = ");
-            continue;
-        }
-        write_expression(child, writer)?;
-        break;
     }
 
     Ok(())

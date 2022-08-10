@@ -5,6 +5,19 @@ static_assert(true, "This is an assertion error");
 assert(true, "This is an assertion error");
 using __intrinsics__.Handle;
 
+new a;
+const a;
+a;
+new Float: b = 0.23;
+Float: b = 0.23;
+new a = 0 + 1;
+new bool: c;
+new _: d = 2, Float: e, bool: f = true, String: g = 'c';
+new Action: ac = INVALID_HANDLE;
+Action: ac = INVALID_HANDLE;
+vec[MAXPLAYERS + 1];
+vec[];
+
 
 stock float operator++(float oper)
 {
@@ -16,7 +29,7 @@ native float operator*(float oper1, float oper2) = FloatMul;
 native float operator/(float oper1, float oper2) = FloatDiv;
 
 
-typedef SQLTxnFailure = function void(Database db, any data, int numQueries, const char[] error, int failIndex, any[] queryData);
+typedef SQLTxnFailure = function void(Database db, any data, int numQueries, const char[]error, int failIndex, any[]queryData);
 
 
 functag SrvCmd Action: public(args);
@@ -24,19 +37,19 @@ functag SrvCmd Action: public(args);
 
 funcenum Timer
 {
-// comment
+	// comment
 	Action: public (Handle:Timer, Handle:hndl),
-// comment
+	// comment
 	Action: public (Handle:timer),
 };
 
 
 typeset EventHook
 {
-// comment
-	function Action(Event event, const char[] name, bool dontBroadcast);
-// comment
-	function void(Event event, const char[] name, bool dontBroadcast);
+	// comment
+	function Action(Event event, const char[]name, bool dontBroadcast);
+	// comment
+	function void(Event event, const char[]name, bool dontBroadcast);
 };
 
 
@@ -48,6 +61,7 @@ enum FOO(<<= 1.0)
 	BIT4,
 }
 
+
 methodmap EmbedFooter < JSONObject
 {
 	/**
@@ -56,13 +70,12 @@ methodmap EmbedFooter < JSONObject
 	 * @param text			Text of the footer.
 	 * @return					Returns the EmbedFooter.
 	 */
-	public EmbedFooter(const char[] text="") 
+	public EmbedFooter(const char[]text = "")
 	{
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.SetString("text", text);
 		return view_as<EmbedFooter>(jsonObject);
 	}
-
 	/**
 	 * Retrieve the text of the footer.
 	 * 
@@ -70,11 +83,12 @@ methodmap EmbedFooter < JSONObject
 	 * @param maxlength			Maximum length of the string buffer.
 	 * @return							True on success. False otherwise.
 	 */
-	public bool GetText(char[] buffer, int maxlength)
+	public bool GetText(char[]buffer, int maxlength)
 	{
 		return this.GetString("text", buffer, maxlength);
 	}
-}
+};
+
 
 void OnPluginStart()
 {
@@ -140,7 +154,7 @@ enum struct WEAPONS_ENUM
 	int HKP2000;
 
 
-	int GetData(int[] data)
+	int GetData(int[]data)
 	{
 		data[0] = this.KNIFE;
 		data[1] = this.GLOCK;

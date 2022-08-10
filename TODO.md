@@ -14,7 +14,7 @@
 [X] struct
 [X] struct_declaration
 [X] global_variable_declaration
-[X] old_global_variable_declaration
+[ ] old_global_variable_declaration
 [X] preproc_include
 [X] preproc_tryinclude
 [X] preproc_define

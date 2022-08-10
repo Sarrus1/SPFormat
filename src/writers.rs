@@ -11,13 +11,13 @@ pub mod enums;
 pub mod expressions;
 pub mod functags;
 pub mod functions;
+pub mod methodmaps;
 pub mod preproc;
 pub mod source_file;
 pub mod statements;
 pub mod structs;
 pub mod typedefs;
 pub mod variables;
-pub mod methodmaps;
 
 pub struct Writer<'a> {
     pub output: String,
@@ -62,11 +62,19 @@ pub fn write_comment(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
         match prev_node.kind().borrow() {
             "comment" => {
                 if node.start_position().row() - 1 > prev_node.end_position().row() {
-                    // Add a single break
+                    // Previous comment is more than one line above, add a line break.
                     writer.breakl();
+                    writer.write_indent()
                 }
             }
-            _ => {}
+            _ => {
+                if node.start_position().row() == prev_node.end_position().row() {
+                    // Previous node is on the same line, simply add a tab.
+                    writer.output.push('\t');
+                } else {
+                    writer.write_indent();
+                }
+            }
         }
     }
     write_node(node, writer)?;

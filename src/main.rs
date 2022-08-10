@@ -86,6 +86,8 @@ fn main() -> Result<(), Utf8Error> {
         return Ok(());
     }
     fs::write(&filename, output).expect("Something went wrong while writing the file.");
+    println!("Press any key to exit...");
+    std::io::stdin().read_line(&mut String::new()).unwrap();
     Ok(())
 }
 

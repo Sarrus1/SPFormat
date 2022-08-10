@@ -24,3 +24,9 @@
 [X] hardcoded_symbol
 [X] alias_declaration
 [X] alias_assignment
+
+## Improvements
+
+[ ] Improve arrays literals.
+[ ] Support automatic line breaks.
+[ ] Improve preproc statement support.

@@ -80,7 +80,7 @@ pub fn write_funcenum(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
                 }
             }
             "comment" => write_comment(child, writer)?,
-            "," => continue,
+            ";" | "," => continue,
             _ => {
                 println!("Unexpected kind {} in write_funcenum.", kind);
             }

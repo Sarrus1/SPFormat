@@ -4,7 +4,7 @@ use tree_sitter::Node;
 
 use super::{
     functions::write_argument_declarations, prev_sibling_kind, statements::write_block,
-    variables::write_type, write_node, Writer,
+    variables::write_type, write_comment, write_node, Writer,
 };
 
 pub fn write_methodmap(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
@@ -50,6 +50,7 @@ pub fn write_methodmap(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
                 write_methodmap_method(child, writer)?
             }
             "methodmap_property" => write_methodmap_property(child, writer)?,
+            "comment" => write_comment(child, writer)?,
             ";" => continue,
             _ => {
                 println!("Unexpected kind {} in write_methodmap.", kind);
@@ -78,7 +79,7 @@ fn write_methodmap_alias(node: Node, writer: &mut Writer) -> Result<(), Utf8Erro
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "methodmap_visibility" => writer.output.push_str("public "),
+            "public" => writer.output.push_str("public "),
             "~" | "(" | ")" | "symbol" => write_node(child, writer)?,
             "=" => writer.output.push_str(" = "),
             ";" => continue,
@@ -107,7 +108,7 @@ fn write_methodmap_native(node: Node, writer: &mut Writer) -> Result<(), Utf8Err
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "methodmap_visibility" => writer.output.push_str("public "),
+            "public" => writer.output.push_str("public "),
             "static" | "native" => {
                 write_node(child, writer)?;
                 writer.output.push(' ');
@@ -142,7 +143,7 @@ fn write_methodmap_method(node: Node, writer: &mut Writer) -> Result<(), Utf8Err
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "methodmap_visibility" => writer.output.push_str("public "),
+            "public" => writer.output.push_str("public "),
             "static" => {
                 write_node(child, writer)?;
                 writer.output.push(' ');
@@ -235,7 +236,7 @@ fn write_methodmap_property_alias(node: Node, writer: &mut Writer) -> Result<(),
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "methodmap_visibility" => writer.output.push_str("public "),
+            "public" => writer.output.push_str("public "),
             "methodmap_property_getter" => writer.output.push_str("get()"),
             "symbol" => write_node(child, writer)?,
             "=" => writer.output.push_str(" = "),
@@ -268,7 +269,7 @@ fn write_methodmap_property_method(node: Node, writer: &mut Writer) -> Result<()
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "methodmap_visibility" => writer.output.push_str("public "),
+            "public" => writer.output.push_str("public "),
             "native" => {
                 write_node(child, writer)?;
                 writer.output.push(' ');

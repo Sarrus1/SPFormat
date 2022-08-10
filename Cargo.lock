@@ -406,7 +406,7 @@ dependencies = [
 
 [[package]]
 name = "sp_format"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "anyhow",
  "cc",

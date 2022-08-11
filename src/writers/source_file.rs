@@ -13,7 +13,8 @@ use super::{
     functions::{write_function_declaration, write_function_definition},
     methodmaps::write_methodmap,
     preproc::{
-        write_preproc_define, write_preproc_generic, write_preproc_include, write_preproc_undefine,
+        break_after_statement, write_preproc_define, write_preproc_generic, write_preproc_include,
+        write_preproc_undefine,
     },
     structs::{write_struct, write_struct_declaration},
     typedefs::{write_typedef, write_typeset},
@@ -79,12 +80,13 @@ pub fn write_assertion(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
         match kind.borrow() {
             "assert" | "static_assert" => write_node(&child, writer)?,
             "function_call_arguments" => write_function_call_arguments(child, writer)?,
-            ";" => write_node(&child, writer)?,
             "comment" => write_comment(child, writer)?,
+            ";" => continue,
             _ => println!("Unexpected kind {} in write_assertion.", kind),
         }
     }
-    writer.breakl();
+    writer.output.push(';');
+    break_after_statement(&node, writer);
 
     Ok(())
 }
@@ -96,12 +98,12 @@ pub fn write_hardcoded_symbol(node: Node, writer: &mut Writer) -> Result<(), Utf
         let kind = child.kind();
         match kind.borrow() {
             "using __intrinsics__.Handle" => write_node(&child, writer)?,
-            ";" => write_node(&child, writer)?,
-            "comment" => write_comment(child, writer)?,
+            ";" => continue,
             _ => println!("Unexpected kind {} in write_hardcoded_symbol.", kind),
         }
     }
-    writer.breakl();
+    writer.output.push(';');
+    break_after_statement(&node, writer);
 
     Ok(())
 }

@@ -20,8 +20,9 @@
 #assert 1==1
 #pragma newdecls required
 
-static_assert(true, "This is an assertion error");
-assert(true, "This is an assertion error");
+static_assert(true, "This is an assertion error");	// foo
+assert(true, "This is an assertion error");	// test
+
 using __intrinsics__.Handle;
 new a;
 const a;

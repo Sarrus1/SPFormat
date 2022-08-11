@@ -1,6 +1,6 @@
 #include <sourcemod>	/** */
 #tryinclude "foo"	// foo
-#define TEST "Hello"
+#define TEST "Hello"	// foo
 // Variadic preprocessor function doesn't actually require anything significant, it seems.
 #define PRINTCHATV(%0,%1,%2) ( PrintColorChat( %0, %1, %2 ) )
 static_assert(true, "This is an assertion error");

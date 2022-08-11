@@ -78,7 +78,9 @@ pub fn write_preproc_define(node: Node, writer: &mut Writer) -> Result<(), Utf8E
                 writer.output.push(' ');
                 write_preproc_arg(child, writer)?;
             }
-            "\n" => continue,
+            "," => writer.output.push_str(", "),
+            "(" | ")" => write_node(&child, writer)?,
+            "macro_param" => write_node(&child, writer)?,
             _ => println!("Unexpected kind {} in write_preproc_define.", kind),
         }
     }

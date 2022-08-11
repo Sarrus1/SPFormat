@@ -118,6 +118,18 @@ pub fn write_preproc_undefine(node: &Node, writer: &mut Writer) -> Result<(), Ut
     Ok(())
 }
 
+/// Write a preprocessor generic:
+/// * `#if`
+/// * `#elseif`
+/// * `#error`
+/// * `#warning`
+/// * `#pragma`
+/// * `#assert`
+///
+/// # Arguments
+///
+/// * `node`   - The preprocessor generic node to write.
+/// * `writer` - The writer object.
 pub fn write_preproc_generic(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
 
@@ -129,7 +141,6 @@ pub fn write_preproc_generic(node: &Node, writer: &mut Writer) -> Result<(), Utf
                 writer.output.push(' ');
             }
             "preproc_arg" => write_preproc_arg(&child, writer)?,
-            "#endif" | "#endinput" | "#else" | "symbol" => write_node(&child, writer)?,
             "comment" => write_comment(child, writer)?,
             _ => println!("Unexpected kind {} in write_preproc_generic.", kind),
         }
@@ -140,6 +151,16 @@ pub fn write_preproc_generic(node: &Node, writer: &mut Writer) -> Result<(), Utf
     Ok(())
 }
 
+/// Write a preprocessor symbol:
+/// * `#else`
+/// * `#endif`
+/// * `#endinput`
+/// * `<symbol>`
+///
+/// # Arguments
+///
+/// * `node`   - The preprocessor symbol node to write.
+/// * `writer` - The writer object.
 pub fn write_preproc_symbol(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let kind = node.kind();
     match kind.borrow() {
@@ -154,6 +175,12 @@ pub fn write_preproc_symbol(node: &Node, writer: &mut Writer) -> Result<(), Utf8
     Ok(())
 }
 
+/// Write a preprocessor arguments node by trimming it.
+///
+/// # Arguments
+///
+/// * `node`   - The preprocessor symbol node to write.
+/// * `writer` - The writer object.
 fn write_preproc_arg(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let args = node.utf8_text(writer.source)?;
     writer.output.push_str(args.trim());

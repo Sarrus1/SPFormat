@@ -3,33 +3,6 @@ use std::{borrow::Borrow, str::Utf8Error};
 
 use tree_sitter::Node;
 
-/// Write a preprocessor include, and add a specified number of breaks after the
-/// statement if the next statement is not preprocessor statement.
-///
-/// # Arguments
-///
-/// * `node`   - The preprocessor include node to write.
-/// * `writer` - The writer object.
-pub fn write_preproc_include(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    let mut cursor = node.walk();
-
-    for child in node.children(&mut cursor) {
-        let kind = child.kind();
-        match kind.borrow() {
-            "#include" | "#tryinclude" => {
-                write_node(&child, writer)?;
-                writer.output.push(' ')
-            }
-            "string_literal" | "system_lib_string" => write_node(&child, writer)?,
-            _ => println!("Unexpected kind {} in write_preproc_include.", kind),
-        }
-    }
-
-    break_after_statement(&node, writer);
-
-    Ok(())
-}
-
 /// Check if there is an inline comment after the statement and don't
 /// insert a line break if there is. Otherwise, insert a line break, and
 /// an additional one if the following statement is there is more than one
@@ -66,7 +39,39 @@ pub fn break_after_statement(node: &Node, writer: &mut Writer) {
     }
 }
 
-pub fn write_preproc_define(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+/// Write a preprocessor include.
+///
+/// # Arguments
+///
+/// * `node`   - The preprocessor include node to write.
+/// * `writer` - The writer object.
+pub fn write_preproc_include(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+    let mut cursor = node.walk();
+
+    for child in node.children(&mut cursor) {
+        let kind = child.kind();
+        match kind.borrow() {
+            "#include" | "#tryinclude" => {
+                write_node(&child, writer)?;
+                writer.output.push(' ')
+            }
+            "string_literal" | "system_lib_string" => write_node(&child, writer)?,
+            _ => println!("Unexpected kind {} in write_preproc_include.", kind),
+        }
+    }
+
+    break_after_statement(&node, writer);
+
+    Ok(())
+}
+
+/// Write a preprocessor define or macro.
+///
+/// # Arguments
+///
+/// * `node`   - The preprocessor define/macro node to write.
+/// * `writer` - The writer object.
+pub fn write_preproc_define(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
 
     for child in node.children(&mut cursor) {
@@ -90,23 +95,25 @@ pub fn write_preproc_define(node: Node, writer: &mut Writer) -> Result<(), Utf8E
     Ok(())
 }
 
-pub fn write_preproc_undefine(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+/// Write a preprocessor undef.
+///
+/// # Arguments
+///
+/// * `node`   - The preprocessor undef node to write.
+/// * `writer` - The writer object.
+pub fn write_preproc_undefine(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
 
-    for sub_node in node.children(&mut cursor) {
-        match sub_node.kind().borrow() {
-            "symbol" => write_node(&sub_node, writer)?,
-            "comment" => {
-                writer.output.push('\t');
-                write_comment(sub_node, writer)?;
-            }
+    for child in node.children(&mut cursor) {
+        let kind = child.kind();
+        match kind.borrow() {
+            "symbol" => write_node(&child, writer)?,
             "#undef" => writer.output.push_str("#undef "),
-            "\n" | _ => {}
+            _ => println!("Unexpected kind {} in write_preproc_undefine.", kind),
         }
     }
-    if !writer.output.ends_with('\n') {
-        writer.breakl();
-    }
+
+    break_after_statement(&node, writer);
 
     Ok(())
 }

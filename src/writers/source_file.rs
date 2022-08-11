@@ -44,9 +44,9 @@ pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf
             "old_global_variable_declaration" => {
                 write_old_global_variable_declaration(&node, writer)?
             }
-            "preproc_include" | "preproc_tryinclude" => write_preproc_include(node, writer)?,
-            "preproc_macro" | "preproc_define" => write_preproc_define(node, writer)?,
-            "preproc_undefine" => write_preproc_undefine(node, writer)?,
+            "preproc_include" | "preproc_tryinclude" => write_preproc_include(&node, writer)?,
+            "preproc_macro" | "preproc_define" => write_preproc_define(&node, writer)?,
+            "preproc_undefine" => write_preproc_undefine(&node, writer)?,
             "hardcoded_symbol" => write_hardcoded_symbol(node, writer)?,
             "alias_declaration" => write_alias_declaration(node, writer)?,
             "alias_assignment" => write_alias_assignment(node, writer)?,

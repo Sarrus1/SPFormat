@@ -3,4 +3,6 @@
   "[sourcepawn]": {
     "editor.formatOnSave": false
   },
+  "editor.insertSpaces": true,
+  "editor.tabSize": 4
 }

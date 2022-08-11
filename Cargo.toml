@@ -35,7 +35,7 @@ web-tree-sitter-sys = "1.3"
 clap = { version = "3.2.15", features = ["derive"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-tree-sitter-sourcepawn = { git = "https://github.com/Sarrus1/tree-sitter-sourcepawn" }
+tree-sitter-sourcepawn = { git = "https://github.com/Sarrus1/tree-sitter-sourcepawn", version="0.5.1" }
 
 [build-dependencies]
 cc = "1.0"

@@ -59,22 +59,12 @@ pub fn write_comment(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let prev_node = node.prev_named_sibling();
     if !prev_node.is_none() {
         let prev_node = prev_node.unwrap();
-        match prev_node.kind().borrow() {
-            "comment" => {
-                if node.start_position().row() - 1 > prev_node.end_position().row() {
-                    // Previous comment is more than one line above, add a line break.
-                    writer.breakl();
-                    writer.write_indent()
-                }
-            }
-            _ => {
-                if node.start_position().row() == prev_node.end_position().row() {
-                    // Previous node is on the same line, simply add a tab.
-                    writer.output.push('\t');
-                } else {
-                    writer.write_indent();
-                }
-            }
+        if node.start_position().row() == prev_node.end_position().row() {
+            // Previous node is on the same line, simply add a tab.
+            writer.output.push('\t');
+        } else {
+            // Previous node is on a different line, indent the comment.
+            writer.write_indent();
         }
     }
     write_node(&node, writer)?;

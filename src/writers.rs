@@ -144,6 +144,7 @@ fn next_sibling_start(node: &Node) -> Option<Point> {
     return Some(next_node.unwrap().start_position());
 }
 
+#[allow(dead_code)]
 fn prev_sibling_end(node: &Node) -> Option<Point> {
     let prev_node = node.prev_sibling();
     if prev_node.is_none() {

@@ -1,7 +1,14 @@
 [package]
 name = "sp_format"
 version = "0.1.11"
+description = "sourcepawn grammar for the tree-sitter parsing library"
+keywords = ["tree-sitter", "formatter", "sourcepawn"]
+categories = ["development-tools"]
+repository = "https://github.com/Sarrus1/SPFormat"
 edition = "2021"
+license = "MIT"
+
+include = ["src/*", "LICENSE.md", "README.md"]
 
 [lib]
 crate-type = ["cdylib", "rlib"]

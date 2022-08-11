@@ -37,4 +37,4 @@
 
 [ ] Improve arrays literals.
 [ ] Support automatic line breaks.
-[ ] Improve preproc statement support.
+[X] Improve preproc statement support.

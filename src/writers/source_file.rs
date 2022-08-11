@@ -6,20 +6,20 @@ use crate::writers::preproc::write_preproc_symbol;
 
 use super::{
     alias::{write_alias_assignment, write_alias_declaration},
+    assertions::write_assertion,
     enum_structs::write_enum_struct,
     enums::write_enum,
-    expressions::write_function_call_arguments,
     functags::{write_funcenum, write_functag},
     functions::{write_function_declaration, write_function_definition},
+    hardcoded_symbols::write_hardcoded_symbol,
     methodmaps::write_methodmap,
     preproc::{
-        break_after_statement, write_preproc_define, write_preproc_generic, write_preproc_include,
-        write_preproc_undefine,
+        write_preproc_define, write_preproc_generic, write_preproc_include, write_preproc_undefine,
     },
     structs::{write_struct, write_struct_declaration},
     typedefs::{write_typedef, write_typeset},
     variables::{write_global_variable, write_old_global_variable_declaration},
-    write_comment, write_node, Writer,
+    write_comment, Writer,
 };
 
 pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
@@ -32,7 +32,7 @@ pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf
         }
         let kind = node.kind();
         match kind.borrow() {
-            "assertion" => write_assertion(node, writer)?,
+            "assertion" => write_assertion(&node, writer)?,
             "function_declaration" => write_function_declaration(node, writer)?,
             "function_definition" => write_function_definition(node, writer)?,
             "enum" => write_enum(node, writer)?,
@@ -51,7 +51,7 @@ pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf
             "preproc_include" | "preproc_tryinclude" => write_preproc_include(&node, writer)?,
             "preproc_macro" | "preproc_define" => write_preproc_define(&node, writer)?,
             "preproc_undefine" => write_preproc_undefine(&node, writer)?,
-            "hardcoded_symbol" => write_hardcoded_symbol(node, writer)?,
+            "hardcoded_symbol" => write_hardcoded_symbol(&node, writer)?,
             "alias_declaration" => write_alias_declaration(node, writer)?,
             "alias_assignment" => write_alias_assignment(node, writer)?,
             "comment" => write_comment(node, writer)?,
@@ -68,42 +68,6 @@ pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf
             }
         };
     }
-
-    Ok(())
-}
-
-pub fn write_assertion(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    let mut cursor = node.walk();
-
-    for child in node.children(&mut cursor) {
-        let kind = child.kind();
-        match kind.borrow() {
-            "assert" | "static_assert" => write_node(&child, writer)?,
-            "function_call_arguments" => write_function_call_arguments(child, writer)?,
-            "comment" => write_comment(child, writer)?,
-            ";" => continue,
-            _ => println!("Unexpected kind {} in write_assertion.", kind),
-        }
-    }
-    writer.output.push(';');
-    break_after_statement(&node, writer);
-
-    Ok(())
-}
-
-pub fn write_hardcoded_symbol(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    let mut cursor = node.walk();
-
-    for child in node.children(&mut cursor) {
-        let kind = child.kind();
-        match kind.borrow() {
-            "using __intrinsics__.Handle" => write_node(&child, writer)?,
-            ";" => continue,
-            _ => println!("Unexpected kind {} in write_hardcoded_symbol.", kind),
-        }
-    }
-    writer.output.push(';');
-    break_after_statement(&node, writer);
 
     Ok(())
 }

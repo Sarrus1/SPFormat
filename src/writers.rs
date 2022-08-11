@@ -6,11 +6,13 @@ use std::{borrow::Borrow, collections::HashSet, str::Utf8Error};
 use tree_sitter::{Language, Node, Point};
 
 pub mod alias;
+pub mod assertions;
 pub mod enum_structs;
 pub mod enums;
 pub mod expressions;
 pub mod functags;
 pub mod functions;
+pub mod hardcoded_symbols;
 pub mod methodmaps;
 pub mod preproc;
 pub mod source_file;

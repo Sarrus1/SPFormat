@@ -29,6 +29,7 @@ pub struct Writer<'a> {
     pub settings: &'a Settings,
     pub _statement_kinds: HashSet<String>,
     pub _expression_kinds: HashSet<String>,
+    pub _preproc_expression_kinds: HashSet<String>,
     pub _literal_kinds: HashSet<String>,
 }
 
@@ -48,6 +49,10 @@ impl Writer<'_> {
 
     fn is_expression(&mut self, kind: String) -> bool {
         return self._expression_kinds.contains(&kind) || self.is_literal(kind);
+    }
+
+    fn is_preproc_expression(&mut self, kind: String) -> bool {
+        return self._preproc_expression_kinds.contains(&kind) || self.is_literal(kind);
     }
 
     fn is_literal(&mut self, kind: String) -> bool {

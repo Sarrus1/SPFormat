@@ -29,6 +29,7 @@ pub fn format_string_language(
         settings: settings,
         _statement_kinds: HashSet::new(),
         _expression_kinds: HashSet::new(),
+        _preproc_expression_kinds: HashSet::new(),
         _literal_kinds: HashSet::new(),
     };
     build_writer(&mut writer);
@@ -55,6 +56,7 @@ fn build_writer(writer: &mut writers::Writer) {
     for kind in _statement_kinds {
         writer._statement_kinds.insert(kind.to_string());
     }
+
     let _expression_kinds = vec![
         "assignment_expression",
         "function_call",
@@ -75,6 +77,17 @@ fn build_writer(writer: &mut writers::Writer) {
     ];
     for kind in _expression_kinds {
         writer._expression_kinds.insert(kind.to_string());
+    }
+
+    let _preproc_expression_kinds = vec![
+        "preproc_binary_expression",
+        "preproc_unary_expression",
+        "symbol",
+        "preproc_parenthesized_expression",
+        "preproc_defined_condition",
+    ];
+    for kind in _preproc_expression_kinds {
+        writer._preproc_expression_kinds.insert(kind.to_string());
     }
 
     let _literal_kinds = vec![

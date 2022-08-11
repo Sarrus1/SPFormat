@@ -7,6 +7,19 @@
 
 #undef PRINTCHATV	//foo
 
+#endinput
+
+#if TEST
+
+#elseif TEST
+#else
+#endif
+
+#error An error
+#warning A warning
+#assert 1==1
+#pragma newdecls required
+
 static_assert(true, "This is an assertion error");
 assert(true, "This is an assertion error");
 using __intrinsics__.Handle;

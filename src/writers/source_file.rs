@@ -2,6 +2,8 @@ use std::{borrow::Borrow, str::Utf8Error};
 
 use tree_sitter::Node;
 
+use crate::writers::preproc::write_preproc_symbol;
+
 use super::{
     alias::{write_alias_assignment, write_alias_declaration},
     enum_structs::write_enum_struct,
@@ -27,7 +29,8 @@ pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf
             writer.skip -= 1;
             continue;
         }
-        match node.kind().borrow() {
+        let kind = node.kind();
+        match kind.borrow() {
             "assertion" => write_assertion(node, writer)?,
             "function_declaration" => write_function_declaration(node, writer)?,
             "function_definition" => write_function_definition(node, writer)?,
@@ -51,11 +54,17 @@ pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf
             "alias_declaration" => write_alias_declaration(node, writer)?,
             "alias_assignment" => write_alias_assignment(node, writer)?,
             "comment" => write_comment(node, writer)?,
-            "preproc_if" | "preproc_endif" | "preproc_else" | "preproc_endinput"
-            | "preproc_pragma" => write_preproc_generic(node, writer)?,
-            _ => writer
-                .output
-                .push_str(node.utf8_text(writer.source)?.borrow()),
+            "preproc_endif" | "preproc_else" | "preproc_endinput" => {
+                write_preproc_symbol(&node, writer)?
+            }
+            "preproc_if" | "preproc_elseif" | "preproc_pragma" | "preproc_error"
+            | "preproc_warning" | "preproc_assert" => write_preproc_generic(&node, writer)?,
+            _ => {
+                println!("Unexpected kind {} in write_source_file.", kind);
+                writer
+                    .output
+                    .push_str(node.utf8_text(writer.source)?.borrow());
+            }
         };
     }
 

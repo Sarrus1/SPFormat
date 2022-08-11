@@ -21,6 +21,14 @@
 [X] preproc_macro
 [X] preproc_undefine
 [X] preproc_endinput
+[X] preproc_endif,
+[X] preproc_if,
+[X] preproc_elseif,
+[X] preproc_else,
+[X] preproc_error,
+[X] preproc_warning,
+[X] preproc_assert,
+[X] preproc_pragma,
 [X] hardcoded_symbol
 [X] alias_declaration
 [X] alias_assignment

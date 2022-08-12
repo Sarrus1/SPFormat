@@ -39,7 +39,7 @@ pub fn write_enum_struct(node: Node, writer: &mut Writer) -> Result<(), Utf8Erro
                 writer.output.push_str("}\n");
                 writer.indent -= 1;
             }
-            "comment" => write_comment(child, writer)?,
+            "comment" => write_comment(&child, writer)?,
             "enum_struct_field" => write_enum_struct_field(child, writer)?,
             "enum_struct_method" => write_enum_struct_method(child, writer)?,
             _ => {
@@ -72,7 +72,7 @@ fn write_enum_struct_field(node: Node, writer: &mut Writer) -> Result<(), Utf8Er
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "type" => write_type(child, writer)?,
+            "type" => write_type(&child, writer)?,
             "symbol" => write_node(&child, writer)?,
             "fixed_dimension" => write_fixed_dimension(child, writer)?,
             ";" => write_node(&child, writer)?,
@@ -102,7 +102,7 @@ fn write_enum_struct_method(node: Node, writer: &mut Writer) -> Result<(), Utf8E
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "type" => write_type(child, writer)?,
+            "type" => write_type(&child, writer)?,
             "symbol" => write_node(&child, writer)?,
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "block" => {

@@ -79,7 +79,7 @@ pub fn write_funcenum(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
                     writer.breakl();
                 }
             }
-            "comment" => write_comment(child, writer)?,
+            "comment" => write_comment(&child, writer)?,
             ";" | "," => continue,
             _ => {
                 println!("Unexpected kind {} in write_funcenum.", kind);

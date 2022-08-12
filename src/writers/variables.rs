@@ -8,21 +8,24 @@ use std::{borrow::Borrow, str::Utf8Error};
 
 use tree_sitter::Node;
 
-pub fn write_global_variable(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+pub fn write_global_variable_declaration(
+    node: &Node,
+    writer: &mut Writer,
+) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
 
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "type" => write_type(child, writer)?,
+            "type" => write_type(&child, writer)?,
             "variable_storage_class" | "variable_visibility" => {
                 write_node(&child, writer)?;
                 writer.output.push(' ');
             }
             "comment" => {
-                write_comment(child, writer)?;
+                write_comment(&child, writer)?;
             }
-            "variable_declaration" => write_variable_declaration(child, writer)?,
+            "variable_declaration" => write_variable_declaration(&child, writer)?,
             "," => writer.output.push_str(", "),
             ";" => continue,
             _ => println!("Unexpected kind {} in write_global_variable.", kind),
@@ -48,7 +51,7 @@ pub fn write_old_global_variable_declaration(
                 writer.output.push(' ');
             }
             "comment" => {
-                write_comment(child, writer)?;
+                write_comment(&child, writer)?;
             }
             "old_variable_declaration" => write_old_variable_declaration(child, writer)?,
             "," => writer.output.push_str(", "),
@@ -65,7 +68,7 @@ pub fn write_old_global_variable_declaration(
     Ok(())
 }
 
-pub fn write_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+pub fn write_type(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let next_kind = next_sibling_kind(&node);
 
     write_node(&node, writer)?;
@@ -89,10 +92,10 @@ pub fn write_variable_declaration_statement(
     for child in node.children(&mut cursor) {
         match child.kind().borrow() {
             "variable_storage_class" => write_variable_storage_class(child, writer)?,
-            "type" => write_type(child, writer)?,
+            "type" => write_type(&child, writer)?,
             "dimension" => write_dimension(child, writer)?,
-            "variable_declaration" => write_variable_declaration(child, writer)?,
-            "comment" => write_comment(child, writer)?,
+            "variable_declaration" => write_variable_declaration(&child, writer)?,
+            "comment" => write_comment(&child, writer)?,
             ";" => writer.output.push(';'),
             "," => writer.output.push_str(", "),
             _ => write_node(&child, writer)?,
@@ -124,7 +127,7 @@ pub fn write_old_variable_declaration_statement(
                 writer.output.push(' ');
             }
             "old_variable_declaration" => write_old_variable_declaration(child, writer)?,
-            "comment" => write_comment(child, writer)?,
+            "comment" => write_comment(&child, writer)?,
             ";" => writer.output.push(';'),
             "," => writer.output.push_str(", "),
             _ => write_node(&child, writer)?,
@@ -184,7 +187,7 @@ fn write_variable_storage_class(node: Node, writer: &mut Writer) -> Result<(), U
     Ok(())
 }
 
-fn write_variable_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+fn write_variable_declaration(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let var_name = node
         .child_by_field_name("name")
         .unwrap()

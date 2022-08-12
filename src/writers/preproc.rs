@@ -141,7 +141,7 @@ pub fn write_preproc_generic(node: &Node, writer: &mut Writer) -> Result<(), Utf
                 writer.output.push(' ');
             }
             "preproc_arg" => write_preproc_arg(&child, writer)?,
-            "comment" => write_comment(child, writer)?,
+            "comment" => write_comment(&child, writer)?,
             _ => println!("Unexpected kind {} in write_preproc_generic.", kind),
         }
     }

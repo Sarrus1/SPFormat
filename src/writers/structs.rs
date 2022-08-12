@@ -15,7 +15,7 @@ pub fn write_struct_declaration(node: Node, writer: &mut Writer) -> Result<(), U
             }
             "comment" => {
                 writer.output.push('\t');
-                write_comment(sub_node, writer)?;
+                write_comment(&sub_node, writer)?;
             }
             "=" => {
                 writer.output.push_str("=\n");
@@ -36,7 +36,7 @@ fn write_struct_constructor(node: Node, writer: &mut Writer) -> Result<(), Utf8E
         match kind.borrow() {
             "comment" => {
                 writer.output.push('\t');
-                write_comment(sub_node, writer)?;
+                write_comment(&sub_node, writer)?;
             }
             "struct_field_value" => write_struct_field_value(sub_node, writer)?,
             "{" => {
@@ -66,7 +66,7 @@ fn write_struct_field_value(node: Node, writer: &mut Writer) -> Result<(), Utf8E
         match sub_node.kind().borrow() {
             "comment" => {
                 writer.output.push('\t');
-                write_comment(sub_node, writer)?;
+                write_comment(&sub_node, writer)?;
             }
             "symbol" => {
                 if key {
@@ -98,7 +98,7 @@ pub fn write_struct(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
         match sub_node.kind().borrow() {
             "comment" => {
                 writer.output.push('\t');
-                write_comment(sub_node, writer)?;
+                write_comment(&sub_node, writer)?;
             }
             "struct" => writer.output.push_str("struct "),
             "symbol" => write_node(&sub_node, writer)?,

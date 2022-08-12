@@ -300,7 +300,7 @@ fn write_switch_case(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
                 writer.output.push_str(":\n");
             }
             "switch_case_values" => write_switch_case_values(child, writer)?,
-            "comment" => write_comment(child, writer)?,
+            "comment" => write_comment(&child, writer)?,
             _ => {
                 if kind == "block" {
                     write_statement(child, writer, true, true)?;
@@ -356,7 +356,7 @@ fn write_switch_case_values(node: Node, writer: &mut Writer) -> Result<(), Utf8E
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "comment" => write_comment(child, writer)?,
+            "comment" => write_comment(&child, writer)?,
             "symbol" => write_node(&child, writer)?,
             "," => writer.output.push_str(", "),
             _ => {
@@ -381,7 +381,7 @@ fn write_return_statement(
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "comment" => write_comment(child, writer)?,
+            "comment" => write_comment(&child, writer)?,
             "return" => {
                 if do_indent {
                     writer.write_indent();
@@ -411,7 +411,7 @@ fn write_delete_statement(
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "comment" => write_comment(child, writer)?,
+            "comment" => write_comment(&child, writer)?,
             "delete" => {
                 if do_indent {
                     writer.write_indent();
@@ -437,7 +437,7 @@ fn write_expression_statement(node: Node, writer: &mut Writer) -> Result<(), Utf
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "comment" => write_comment(child, writer)?,
+            "comment" => write_comment(&child, writer)?,
             _ => {
                 if writer.is_expression(kind.to_string()) {
                     write_expression(child, writer)?;
@@ -540,7 +540,7 @@ pub fn write_block(node: Node, writer: &mut Writer, do_indent: bool) -> Result<(
                 writer.write_indent();
                 write_node(&child, writer)?;
             }
-            "comment" => write_comment(child, writer)?,
+            "comment" => write_comment(&child, writer)?,
             _ => {
                 if writer.is_statement(kind.to_string()) {
                     write_statement(child, writer, true, true)?

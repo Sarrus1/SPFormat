@@ -57,7 +57,7 @@ impl Writer<'_> {
     }
 }
 
-pub fn write_comment(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+pub fn write_comment(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let prev_node = node.prev_named_sibling();
     if !prev_node.is_none() {
         let prev_node = prev_node.unwrap();

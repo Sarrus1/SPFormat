@@ -18,7 +18,7 @@ use super::{
     },
     structs::{write_struct, write_struct_declaration},
     typedefs::{write_typedef, write_typeset},
-    variables::{write_global_variable, write_old_global_variable_declaration},
+    variables::{write_global_variable_declaration, write_old_global_variable_declaration},
     write_comment, Writer,
 };
 
@@ -44,7 +44,7 @@ pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf
             "methodmap" => write_methodmap(node, writer)?,
             "struct" => write_struct(node, writer)?,
             "struct_declaration" => write_struct_declaration(node, writer)?,
-            "global_variable_declaration" => write_global_variable(&node, writer)?,
+            "global_variable_declaration" => write_global_variable_declaration(&node, writer)?,
             "old_global_variable_declaration" => {
                 write_old_global_variable_declaration(&node, writer)?
             }
@@ -54,7 +54,7 @@ pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf
             "hardcoded_symbol" => write_hardcoded_symbol(&node, writer)?,
             "alias_declaration" => write_alias_declaration(node, writer)?,
             "alias_assignment" => write_alias_assignment(node, writer)?,
-            "comment" => write_comment(node, writer)?,
+            "comment" => write_comment(&node, writer)?,
             "preproc_endif" | "preproc_else" | "preproc_endinput" => {
                 write_preproc_symbol(&node, writer)?
             }

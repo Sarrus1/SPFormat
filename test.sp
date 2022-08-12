@@ -32,8 +32,21 @@ char character;
 bool boolean;
 float vec[3];
 bool active[MAXPLAYERS + 1];
-Action action;
-Action action1, action2;
+
+Action action, actionbis;
+
+char test[64] = "Hello this is a very long string",
+     t[64] = "Hello this is a very long string";
+Action action1,
+       action2,
+       action3,
+       action4,
+       action5,
+       action6,
+       action7,
+       action8,
+       action9,
+       action10;
 
 new a;
 const a;

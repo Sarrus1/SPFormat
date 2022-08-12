@@ -173,3 +173,12 @@ fn prev_sibling_end(node: &Node) -> Option<Point> {
     }
     return Some(prev_node.unwrap().end_position());
 }
+
+/// Returns the length of a node.
+///
+/// # Arguments
+///
+/// * `node`   - The node to compute the length of.
+pub fn node_len(node: &Node) -> usize {
+    usize::try_from(node.end_byte() - node.start_byte()).unwrap()
+}

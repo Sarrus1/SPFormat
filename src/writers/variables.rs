@@ -1,6 +1,6 @@
 use super::{
     expressions::{write_expression, write_old_type},
-    next_sibling_kind,
+    next_sibling_kind, node_len,
     preproc::insert_break,
     write_comment, write_dimension, write_dynamic_array, write_fixed_dimension, write_node, Writer,
 };
@@ -20,19 +20,53 @@ pub fn write_global_variable_declaration(
 ) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
 
+    // Compute an estimated length of the declarations.
+    // If it's longer than an threshold, we break the declarations.
+    let mut length = 0;
+    let mut nb_declarations = 0;
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "type" => write_type(&child, writer)?,
+            "variable_declaration" => {
+                // FIXME: This includes whitespaces, and might yield incorrect results.
+                // Sum the length of each node once formatted instead.
+                length += node_len(&child);
+                if nb_declarations > 0 {
+                    // Take the `, ` into account.
+                    length += 2
+                }
+                nb_declarations += 1;
+            }
+            _ => continue,
+        }
+    }
+
+    // Keep track of the type's length (as well as the storage class and visibility)
+    // to properly indent line break variables.
+    // Start at `1` to account for the ` ` between the type and the declaration.
+    let mut type_length = 1;
+    for child in node.children(&mut cursor) {
+        let kind = child.kind();
+        match kind.borrow() {
+            "type" => {
+                write_type(&child, writer)?;
+                type_length += node_len(&child);
+            }
             "variable_storage_class" | "variable_visibility" => {
                 write_node(&child, writer)?;
                 writer.output.push(' ');
+                type_length += node_len(&child) + 1;
             }
-            "comment" => {
-                write_comment(&child, writer)?;
-            }
+            "comment" => write_comment(&child, writer)?,
             "variable_declaration" => write_variable_declaration(&child, writer)?,
-            "," => writer.output.push_str(", "),
+            "," => {
+                if length > 80 {
+                    writer.output.push_str(",\n");
+                    writer.output.push_str(" ".repeat(type_length).as_str());
+                } else {
+                    writer.output.push_str(", ")
+                }
+            }
             ";" => continue,
             _ => println!("Unexpected kind {} in write_global_variable.", kind),
         }

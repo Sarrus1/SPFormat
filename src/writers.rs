@@ -67,7 +67,7 @@ pub fn write_comment(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> 
         let prev_node = prev_node.unwrap();
         if node.start_position().row() == prev_node.end_position().row() {
             // Previous node is on the same line, simply add a tab.
-            writer.output.push('\t');
+            writer.output.push_str(writer.indent_string.as_str());
         } else {
             // Previous node is on a different line, indent the comment.
             writer.write_indent();

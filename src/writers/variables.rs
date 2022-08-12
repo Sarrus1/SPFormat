@@ -23,6 +23,7 @@ pub fn write_global_variable_declaration(
     // Compute an estimated length of the declarations.
     // If it's longer than an threshold, we break the declarations.
     let mut length = 0;
+    let mut max_name_length = 0;
     let mut nb_declarations = 0;
     for child in node.children(&mut cursor) {
         let kind = child.kind();
@@ -36,9 +37,27 @@ pub fn write_global_variable_declaration(
                     length += 2
                 }
                 nb_declarations += 1;
+                let mut name_length = 0;
+                let mut sub_cursor = child.walk();
+                for sub_child in child.children(&mut sub_cursor) {
+                    let sub_kind = sub_child.kind();
+                    match sub_kind.borrow() {
+                        "symbol" => name_length += node_len(&sub_child),
+                        "dimension" => name_length += 2,
+                        "fixed_dimension" => name_length += node_len(&sub_child),
+                        _ => continue,
+                    }
+                }
+                if name_length > max_name_length {
+                    max_name_length = name_length;
+                }
             }
             _ => continue,
         }
+    }
+
+    if length <= 80 {
+        max_name_length = 0;
     }
 
     // Keep track of the type's length (as well as the storage class and visibility)
@@ -57,12 +76,22 @@ pub fn write_global_variable_declaration(
                 writer.output.push(' ');
                 type_length += node_len(&child) + 1;
             }
-            "comment" => write_comment(&child, writer)?,
-            "variable_declaration" => write_variable_declaration(&child, writer)?,
+            "comment" => {
+                write_comment(&child, writer)?;
+                if length > 80 {
+                    writer.output.push_str(" ".repeat(type_length).as_str());
+                }
+            }
+            "variable_declaration" => write_variable_declaration(&child, writer, max_name_length)?,
             "," => {
                 if length > 80 {
-                    writer.output.push_str(",\n");
-                    writer.output.push_str(" ".repeat(type_length).as_str());
+                    let next_kind = next_sibling_kind(&child);
+                    if next_kind == "comment" {
+                        writer.output.push_str(",");
+                    } else {
+                        writer.output.push_str(",\n");
+                        writer.output.push_str(" ".repeat(type_length).as_str());
+                    }
                 } else {
                     writer.output.push_str(", ")
                 }
@@ -135,7 +164,7 @@ pub fn write_variable_declaration_statement(
             "variable_storage_class" => write_variable_storage_class(child, writer)?,
             "type" => write_type(&child, writer)?,
             "dimension" => write_dimension(child, writer, true)?,
-            "variable_declaration" => write_variable_declaration(&child, writer)?,
+            "variable_declaration" => write_variable_declaration(&child, writer, 0)?,
             "comment" => write_comment(&child, writer)?,
             ";" => writer.output.push(';'),
             "," => writer.output.push_str(", "),
@@ -234,16 +263,38 @@ fn write_variable_storage_class(node: Node, writer: &mut Writer) -> Result<(), U
 ///
 /// * `node`   - The variable declaration node to write.
 /// * `writer` - The writer object.
-fn write_variable_declaration(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+/// * `writer` - The writer object.
+fn write_variable_declaration(
+    node: &Node,
+    writer: &mut Writer,
+    max_name_length: usize,
+) -> Result<(), Utf8Error> {
+    let mut name_length = 0;
     let mut cursor = node.walk();
 
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "symbol" => write_node(&child, writer)?,
-            "fixed_dimension" => write_fixed_dimension(child, writer, false)?,
-            "dimension" => write_dimension(child, writer, false)?,
-            "=" => writer.output.push_str(" = "),
+            "symbol" => {
+                write_node(&child, writer)?;
+                name_length += node_len(&child);
+            }
+            "fixed_dimension" => {
+                name_length += node_len(&child);
+                write_fixed_dimension(child, writer, false)?;
+            }
+            "dimension" => {
+                write_dimension(child, writer, false)?;
+                name_length += 2;
+            }
+            "=" => {
+                if max_name_length != 0 {
+                    writer
+                        .output
+                        .push_str(" ".repeat(max_name_length - name_length).as_str());
+                }
+                writer.output.push_str(" = ");
+            }
             "dynamic_array" => write_dynamic_array(child, writer)?,
             _ => {
                 if writer.is_expression(&kind) {

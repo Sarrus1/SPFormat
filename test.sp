@@ -33,12 +33,13 @@ bool boolean;
 float vec[3];
 bool active[MAXPLAYERS + 1];
 
-Action action, actionbis;
+Action action, actionbis;	// test
 
+int foo = 1, baaaaaar = 10;
 char test[64] = "Hello this is a very long string",
-     t[64] = "Hello this is a very long string";
-Action action1,
-       action2,
+     t[64]    = "Hello this is a very long string";
+Action action1,	/* a */
+       action2,	// b
        action3,
        action4,
        action5,

@@ -98,7 +98,7 @@ fn write_typedef_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8E
         let kind = child.kind();
         match kind.borrow() {
             "function" => writer.output.push_str("function "),
-            "type" => write_type(child, writer, false)?,
+            "type" => write_type(child, writer)?,
             "dimension" => write_dimension(child, writer)?,
             "fixed_dimension" => {
                 let next_kind = next_sibling_kind(&child);

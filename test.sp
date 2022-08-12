@@ -24,6 +24,17 @@ static_assert(true, "This is an assertion error");	// foo
 assert(true, "This is an assertion error");	// test
 
 using __intrinsics__.Handle;
+
+int number;
+float pointnumber;
+
+char character;
+bool boolean;
+float vec[3];
+bool active[MAXPLAYERS + 1];
+Action action;
+Action action1, action2;
+
 new a;
 const a;
 a;
@@ -35,7 +46,7 @@ new _: d = 2, Float: e, bool: f = true, String: g = 'c';
 new Action: ac = INVALID_HANDLE;
 Action: ac = INVALID_HANDLE;
 vec[MAXPLAYERS + 1];
-vec[];
+vec[] ;
 
 
 stock float operator++(float oper)
@@ -48,7 +59,7 @@ native float operator*(float oper1, float oper2) = FloatMul;
 native float operator/(float oper1, float oper2) = FloatDiv;
 
 
-typedef SQLTxnFailure = function void(Database db, any data, int numQueries, const char[]error, int failIndex, any[]queryData);
+typedef SQLTxnFailure = function void (Database db, any data, int numQueries, const char[] error, int failIndex, any[] queryData);
 
 
 functag SrvCmd Action: public(args);
@@ -66,9 +77,9 @@ funcenum Timer
 typeset EventHook
 {
 	// comment
-	function Action(Event event, const char[]name, bool dontBroadcast);
+	function Action (Event event, const char[] name, bool dontBroadcast);
 	// comment
-	function void(Event event, const char[]name, bool dontBroadcast);
+	function void (Event event, const char[] name, bool dontBroadcast);
 };
 
 
@@ -89,7 +100,7 @@ methodmap EmbedFooter < JSONObject
 	 * @param text			Text of the footer.
 	 * @return					Returns the EmbedFooter.
 	 */
-	public EmbedFooter(const char[]text = "")
+	public EmbedFooter(const char[] text = "")
 	{
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.SetString("text", text);
@@ -102,7 +113,7 @@ methodmap EmbedFooter < JSONObject
 	 * @param maxlength			Maximum length of the string buffer.
 	 * @return							True on success. False otherwise.
 	 */
-	public bool GetText(char[]buffer, int maxlength)
+	public bool GetText(char[] buffer, int maxlength)
 	{
 		return this.GetString("text", buffer, maxlength);
 	}
@@ -173,7 +184,7 @@ enum struct WEAPONS_ENUM
 	int HKP2000;
 
 
-	int GetData(int[]data)
+	int GetData(int[] data)
 	{
 		data[0] = this.KNIFE;
 		data[1] = this.GLOCK;

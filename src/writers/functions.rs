@@ -24,7 +24,7 @@ pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(),
     for child in node.children(&mut cursor) {
         match child.kind().borrow() {
             "function_visibility" => write_function_visibility(child, writer)?,
-            "type" => write_type(child, writer, true)?,
+            "type" => write_type(child, writer)?,
             "dimension" => write_dimension(child, writer)?,
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "symbol" => write_node(&child, writer)?,
@@ -59,7 +59,7 @@ pub fn write_function_definition(node: Node, writer: &mut Writer) -> Result<(), 
     for child in node.children(&mut cursor) {
         match child.kind().borrow() {
             "function_definition_type" => write_function_visibility(child, writer)?,
-            "type" => write_type(child, writer, true)?,
+            "type" => write_type(child, writer)?,
             "dimension" => write_dimension(child, writer)?,
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "symbol" => write_node(&child, writer)?,
@@ -131,7 +131,7 @@ fn write_argument_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
                     writer.output.push(' ')
                 };
             }
-            "type" => write_type(child, writer, true)?,
+            "type" => write_type(child, writer)?,
             "dimension" => write_dimension(child, writer)?,
             _ => write_node(&child, writer)?,
         }

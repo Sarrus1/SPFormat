@@ -1,51 +1,35 @@
 use super::{
     expressions::{write_expression, write_old_type},
-    next_sibling_kind, write_comment, write_dimension, write_dynamic_array, write_fixed_dimension,
-    write_node, Writer,
+    next_sibling_kind,
+    preproc::insert_break,
+    write_comment, write_dimension, write_dynamic_array, write_fixed_dimension, write_node, Writer,
 };
 use std::{borrow::Borrow, str::Utf8Error};
 
 use tree_sitter::Node;
 
-pub fn write_global_variable(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+pub fn write_global_variable(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
-    global_variable_declaration_break(&node, writer)?;
 
-    for sub_node in node.children(&mut cursor) {
-        let kind = sub_node.kind();
+    for child in node.children(&mut cursor) {
+        let kind = child.kind();
         match kind.borrow() {
-            "variable_storage_class" | "variable_visibility" | "type" => {
-                writer
-                    .output
-                    .push_str(sub_node.utf8_text(writer.source)?.borrow());
+            "type" => write_type(child, writer)?,
+            "variable_storage_class" | "variable_visibility" => {
+                write_node(&child, writer)?;
                 writer.output.push(' ');
             }
             "comment" => {
-                write_comment(sub_node, writer)?;
+                write_comment(child, writer)?;
             }
-            "variable_declaration" => write_variable_declaration(sub_node, writer)?,
+            "variable_declaration" => write_variable_declaration(child, writer)?,
             "," => writer.output.push_str(", "),
             ";" => continue,
             _ => println!("Unexpected kind {} in write_global_variable.", kind),
         }
     }
-    let next_node = node.next_sibling();
-    if next_node.is_none() {
-        writer.output.push_str(";");
-        return Ok(());
-    }
-    let next_node = next_node.unwrap();
-    if next_node.kind() == "comment" {
-        if next_node.start_position().row() == node.end_position().row() {
-            writer.output.push_str(";\t");
-            write_comment(next_node, writer)?;
-            writer.skip += 1;
-        } else {
-            writer.output.push_str(";\n\n");
-        }
-    } else {
-        writer.output.push_str(";\n");
-    }
+    writer.output.push(';');
+    insert_break(&node, writer);
 
     Ok(())
 }
@@ -81,45 +65,11 @@ pub fn write_old_global_variable_declaration(
     Ok(())
 }
 
-fn global_variable_declaration_break(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    let prev_node = node.prev_sibling();
-
-    if prev_node.is_none() {
-        return Ok(());
-    }
-    let prev_node = prev_node.unwrap();
-    if prev_node.kind() == "comment"
-        && prev_node.end_position().row() == node.start_position().row() - 1
-    {
-        return Ok(());
-    }
-    if prev_node.kind() != "global_variable_declaration" {
-        writer.breakl();
-        return Ok(());
-    }
-    // Don't double next line if same type.
-    let var_type = node
-        .child_by_field_name("type")
-        .unwrap()
-        .utf8_text(writer.source)?;
-    let prev_var_type = prev_node
-        .child_by_field_name("type")
-        .unwrap()
-        .utf8_text(writer.source)?;
-
-    if var_type != prev_var_type {
-        writer.breakl();
-        return Ok(());
-    }
-
-    Ok(())
-}
-
-pub fn write_type(node: Node, writer: &mut Writer, insert_space: bool) -> Result<(), Utf8Error> {
+pub fn write_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let next_kind = next_sibling_kind(&node);
 
     write_node(&node, writer)?;
-    if insert_space && next_kind != "dimension" && next_kind != "fixed_dimension" {
+    if next_kind != "dimension" && next_kind != "fixed_dimension" {
         writer.output.push(' ')
     };
 
@@ -139,7 +89,7 @@ pub fn write_variable_declaration_statement(
     for child in node.children(&mut cursor) {
         match child.kind().borrow() {
             "variable_storage_class" => write_variable_storage_class(child, writer)?,
-            "type" => write_type(child, writer, true)?,
+            "type" => write_type(child, writer)?,
             "dimension" => write_dimension(child, writer)?,
             "variable_declaration" => write_variable_declaration(child, writer)?,
             "comment" => write_comment(child, writer)?,

@@ -1,4 +1,4 @@
-use super::{preproc::break_after_statement, write_node, Writer};
+use super::{preproc::insert_break, write_node, Writer};
 
 use std::{borrow::Borrow, str::Utf8Error};
 use tree_sitter::Node;
@@ -15,7 +15,7 @@ pub fn write_hardcoded_symbol(node: &Node, writer: &mut Writer) -> Result<(), Ut
         }
     }
     writer.output.push(';');
-    break_after_statement(&node, writer);
+    insert_break(&node, writer);
 
     Ok(())
 }

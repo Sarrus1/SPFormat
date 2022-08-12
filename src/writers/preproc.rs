@@ -12,7 +12,7 @@ use tree_sitter::Node;
 ///
 /// * `node`   - The node which was written.
 /// * `writer` - The writer object.
-pub fn break_after_statement(node: &Node, writer: &mut Writer) {
+pub fn insert_break(node: &Node, writer: &mut Writer) {
     let next_kind = next_sibling_kind(&node);
     if next_kind == "" {
         // No next sibling, add a break and return.
@@ -60,7 +60,7 @@ pub fn write_preproc_include(node: &Node, writer: &mut Writer) -> Result<(), Utf
         }
     }
 
-    break_after_statement(&node, writer);
+    insert_break(&node, writer);
 
     Ok(())
 }
@@ -90,7 +90,7 @@ pub fn write_preproc_define(node: &Node, writer: &mut Writer) -> Result<(), Utf8
         }
     }
 
-    break_after_statement(&node, writer);
+    insert_break(&node, writer);
 
     Ok(())
 }
@@ -113,7 +113,7 @@ pub fn write_preproc_undefine(node: &Node, writer: &mut Writer) -> Result<(), Ut
         }
     }
 
-    break_after_statement(&node, writer);
+    insert_break(&node, writer);
 
     Ok(())
 }
@@ -146,7 +146,7 @@ pub fn write_preproc_generic(node: &Node, writer: &mut Writer) -> Result<(), Utf
         }
     }
 
-    break_after_statement(&node, writer);
+    insert_break(&node, writer);
 
     Ok(())
 }
@@ -170,7 +170,7 @@ pub fn write_preproc_symbol(node: &Node, writer: &mut Writer) -> Result<(), Utf8
         _ => println!("Unexpected kind {} in write_preproc_symbol.", kind),
     }
 
-    break_after_statement(&node, writer);
+    insert_break(&node, writer);
 
     Ok(())
 }

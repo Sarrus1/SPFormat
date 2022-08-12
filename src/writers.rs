@@ -1,6 +1,6 @@
 use crate::settings::Settings;
 
-use self::{expressions::write_expression, preproc::break_after_statement};
+use self::{expressions::write_expression, preproc::insert_break};
 
 use std::{borrow::Borrow, collections::HashSet, str::Utf8Error};
 use tree_sitter::{Language, Node, Point};
@@ -69,9 +69,11 @@ pub fn write_comment(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
             writer.write_indent();
         }
     }
-    write_node(&node, writer)?;
 
-    break_after_statement(&node, writer);
+    let text = node.utf8_text(writer.source)?;
+    writer.output.push_str(&text.trim());
+
+    insert_break(&node, writer);
 
     Ok(())
 }
@@ -93,7 +95,8 @@ fn write_dynamic_array(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
 fn write_dimension(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let next_kind = next_sibling_kind(&node);
     writer.output.push_str("[]");
-    if next_kind != "" && next_kind != "dimension" && next_kind != "fixed_dimension" {
+
+    if next_kind != "dimension" && next_kind != "fixed_dimension" {
         writer.output.push(' ')
     };
 

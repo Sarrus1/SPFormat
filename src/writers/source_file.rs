@@ -44,7 +44,7 @@ pub fn write_source_file(root_node: Node, writer: &mut Writer) -> Result<(), Utf
             "methodmap" => write_methodmap(node, writer)?,
             "struct" => write_struct(node, writer)?,
             "struct_declaration" => write_struct_declaration(node, writer)?,
-            "global_variable_declaration" => write_global_variable(node, writer)?,
+            "global_variable_declaration" => write_global_variable(&node, writer)?,
             "old_global_variable_declaration" => {
                 write_old_global_variable_declaration(&node, writer)?
             }

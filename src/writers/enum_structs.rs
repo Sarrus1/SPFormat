@@ -72,7 +72,7 @@ fn write_enum_struct_field(node: Node, writer: &mut Writer) -> Result<(), Utf8Er
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "type" => write_type(child, writer, true)?,
+            "type" => write_type(child, writer)?,
             "symbol" => write_node(&child, writer)?,
             "fixed_dimension" => write_fixed_dimension(child, writer)?,
             ";" => write_node(&child, writer)?,
@@ -102,7 +102,7 @@ fn write_enum_struct_method(node: Node, writer: &mut Writer) -> Result<(), Utf8E
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
-            "type" => write_type(child, writer, true)?,
+            "type" => write_type(child, writer)?,
             "symbol" => write_node(&child, writer)?,
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "block" => {

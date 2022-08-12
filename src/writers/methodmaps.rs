@@ -113,7 +113,7 @@ fn write_methodmap_native(node: Node, writer: &mut Writer) -> Result<(), Utf8Err
                 write_node(&child, writer)?;
                 writer.output.push(' ');
             }
-            "type" => write_type(child, writer, true)?,
+            "type" => write_type(child, writer)?,
             "(" | ")" | "symbol" | "~" => write_node(&child, writer)?,
             "=" => writer.output.push_str(" = "),
             "argument_declarations" => write_argument_declarations(child, writer)?,
@@ -148,7 +148,7 @@ fn write_methodmap_method(node: Node, writer: &mut Writer) -> Result<(), Utf8Err
                 write_node(&child, writer)?;
                 writer.output.push(' ');
             }
-            "type" => write_type(child, writer, true)?,
+            "type" => write_type(child, writer)?,
             "(" | ")" | "symbol" | "~" => write_node(&child, writer)?,
             "=" => writer.output.push_str(" = "),
             "argument_declarations" => write_argument_declarations(child, writer)?,
@@ -189,7 +189,7 @@ fn write_methodmap_property(node: Node, writer: &mut Writer) -> Result<(), Utf8E
                 write_node(&child, writer)?;
                 writer.output.push(' ');
             }
-            "type" => write_type(child, writer, true)?,
+            "type" => write_type(child, writer)?,
             "(" | ")" | "symbol" | "~" => write_node(&child, writer)?,
             "{" => {
                 if writer.settings.brace_wrapping_before_methodmap_property {
@@ -307,7 +307,7 @@ fn write_methodmap_property_setter(node: Node, writer: &mut Writer) -> Result<()
         match kind.borrow() {
             "set" => writer.output.push_str("set"),
             "symbol" | "(" | ")" => write_node(&child, writer)?,
-            "type" => write_type(child, writer, true)?,
+            "type" => write_type(child, writer)?,
             ";" => continue,
             _ => println!(
                 "Unexpected kind {} in write_methodmap_property_setter.",

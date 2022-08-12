@@ -1,6 +1,6 @@
 use super::{
-    expressions::write_function_call_arguments, preproc::break_after_statement, write_comment,
-    write_node, Writer,
+    expressions::write_function_call_arguments, preproc::insert_break, write_comment, write_node,
+    Writer,
 };
 
 use std::{borrow::Borrow, str::Utf8Error};
@@ -20,7 +20,7 @@ pub fn write_assertion(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error
         }
     }
     writer.output.push(';');
-    break_after_statement(&node, writer);
+    insert_break(&node, writer);
 
     Ok(())
 }

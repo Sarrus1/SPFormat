@@ -1,6 +1,6 @@
 [package]
 name = "sp_format"
-version = "0.1.11"
+version = "0.1.12"
 description = "sourcepawn grammar for the tree-sitter parsing library"
 keywords = ["tree-sitter", "formatter", "sourcepawn"]
 categories = ["development-tools"]

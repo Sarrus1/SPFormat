@@ -8,6 +8,12 @@ use std::{borrow::Borrow, str::Utf8Error};
 
 use tree_sitter::Node;
 
+/// Write a global variable declaration.
+///
+/// # Arguments
+///
+/// * `node`   - The preprocessor global variable declaration node to write.
+/// * `writer` - The writer object.
 pub fn write_global_variable_declaration(
     node: &Node,
     writer: &mut Writer,
@@ -32,6 +38,7 @@ pub fn write_global_variable_declaration(
         }
     }
     writer.output.push(';');
+
     insert_break(&node, writer);
 
     Ok(())
@@ -93,7 +100,7 @@ pub fn write_variable_declaration_statement(
         match child.kind().borrow() {
             "variable_storage_class" => write_variable_storage_class(child, writer)?,
             "type" => write_type(&child, writer)?,
-            "dimension" => write_dimension(child, writer)?,
+            "dimension" => write_dimension(child, writer, true)?,
             "variable_declaration" => write_variable_declaration(&child, writer)?,
             "comment" => write_comment(&child, writer)?,
             ";" => writer.output.push(';'),
@@ -151,12 +158,12 @@ fn write_old_variable_declaration(node: Node, writer: &mut Writer) -> Result<(),
         let kind = child.kind();
         match kind.borrow() {
             "old_type" => write_old_type(child, writer)?,
-            "dimension" => write_dimension(child, writer)?,
-            "fixed_dimension" => write_fixed_dimension(child, writer)?,
+            "dimension" => write_dimension(child, writer, false)?,
+            "fixed_dimension" => write_fixed_dimension(child, writer, false)?,
             "symbol" => write_node(&child, writer)?,
             "=" => writer.output.push_str(" = "),
             _ => {
-                if writer.is_expression(kind.to_string()) {
+                if writer.is_expression(&kind) {
                     write_expression(child, writer)?;
                 } else {
                     println!(
@@ -188,32 +195,24 @@ fn write_variable_storage_class(node: Node, writer: &mut Writer) -> Result<(), U
 }
 
 fn write_variable_declaration(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    let var_name = node
-        .child_by_field_name("name")
-        .unwrap()
-        .utf8_text(writer.source)?;
-    writer.output.push_str(var_name.borrow());
-
     let mut cursor = node.walk();
-    // Write the dimensions of a declaration, if they exist.
-    for sub_child in node.named_children(&mut cursor) {
-        match sub_child.kind().borrow() {
-            "fixed_dimension" => write_fixed_dimension(sub_child, writer)?,
-            "dimension" => write_dimension(sub_child, writer)?,
-            _ => continue,
+
+    for child in node.children(&mut cursor) {
+        let kind = child.kind();
+        match kind.borrow() {
+            "symbol" => write_node(&child, writer)?,
+            "fixed_dimension" => write_fixed_dimension(child, writer, false)?,
+            "dimension" => write_dimension(child, writer, false)?,
+            "=" => writer.output.push_str(" = "),
+            "dynamic_array" => write_dynamic_array(child, writer)?,
+            _ => {
+                if writer.is_expression(&kind) {
+                    write_expression(child, writer)?
+                } else {
+                    println!("Unexpected kind {} in write_global_variable.", kind);
+                }
+            }
         }
-    }
-    // Write the default value of a declaration, if it exists.
-    for sub_child in node.children_by_field_name("initialValue", &mut cursor) {
-        if sub_child.kind().to_string() == "=" {
-            writer.output.push_str(" = ");
-            continue;
-        } else if sub_child.kind().to_string() == "dynamic_array" {
-            write_dynamic_array(sub_child, writer)?;
-            continue;
-        }
-        write_expression(sub_child, writer)?;
-        break;
     }
 
     Ok(())

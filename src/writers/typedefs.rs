@@ -99,14 +99,8 @@ fn write_typedef_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8E
         match kind.borrow() {
             "function" => writer.output.push_str("function "),
             "type" => write_type(&child, writer)?,
-            "dimension" => write_dimension(child, writer)?,
-            "fixed_dimension" => {
-                let next_kind = next_sibling_kind(&child);
-                write_fixed_dimension(child, writer)?;
-                if next_kind != "dimension" || next_kind != "fixed_dimension" {
-                    writer.output.push(' ')
-                };
-            }
+            "dimension" => write_dimension(child, writer, false)?,
+            "fixed_dimension" => write_fixed_dimension(child, writer, false)?,
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "(" | ")" => continue,
             _ => {

@@ -2,7 +2,11 @@ use crate::settings::Settings;
 
 use self::{expressions::write_expression, preproc::insert_break};
 
-use std::{borrow::Borrow, collections::HashSet, str::Utf8Error};
+use std::{
+    borrow::{Borrow, Cow},
+    collections::HashSet,
+    str::Utf8Error,
+};
 use tree_sitter::{Language, Node, Point};
 
 pub mod alias;
@@ -44,16 +48,16 @@ impl Writer<'_> {
         self.output.push('\n');
     }
 
-    fn is_statement(&mut self, kind: String) -> bool {
-        return self._statement_kinds.contains(&kind);
+    fn is_statement(&mut self, kind: &Cow<str>) -> bool {
+        return self._statement_kinds.contains(&kind.to_string());
     }
 
-    fn is_expression(&mut self, kind: String) -> bool {
-        return self._expression_kinds.contains(&kind) || self.is_literal(kind);
+    fn is_expression(&mut self, kind: &Cow<str>) -> bool {
+        return self._expression_kinds.contains(&kind.to_string()) || self.is_literal(kind);
     }
 
-    fn is_literal(&mut self, kind: String) -> bool {
-        return self._literal_kinds.contains(&kind);
+    fn is_literal(&mut self, kind: &Cow<str>) -> bool {
+        return self._literal_kinds.contains(&kind.to_string());
     }
 }
 
@@ -92,20 +96,28 @@ fn write_dynamic_array(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
     Ok(())
 }
 
-fn write_dimension(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+fn write_dimension(node: Node, writer: &mut Writer, insert_space: bool) -> Result<(), Utf8Error> {
     let next_kind = next_sibling_kind(&node);
     writer.output.push_str("[]");
 
-    if next_kind != "dimension" && next_kind != "fixed_dimension" {
+    if insert_space && next_kind != "dimension" && next_kind != "fixed_dimension" {
         writer.output.push(' ')
     };
 
     Ok(())
 }
 
-fn write_fixed_dimension(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
+fn write_fixed_dimension(
+    node: Node,
+    writer: &mut Writer,
+    insert_space: bool,
+) -> Result<(), Utf8Error> {
+    let next_kind = next_sibling_kind(&node);
+
     let mut cursor = node.walk();
+
     writer.output.push('[');
+
     for child in node.children(&mut cursor) {
         match child.kind().borrow() {
             "[" | "]" => continue,
@@ -113,6 +125,10 @@ fn write_fixed_dimension(node: Node, writer: &mut Writer) -> Result<(), Utf8Erro
         }
     }
     writer.output.push(']');
+
+    if insert_space && next_kind != "dimension" && next_kind != "fixed_dimension" {
+        writer.output.push(' ')
+    };
 
     Ok(())
 }

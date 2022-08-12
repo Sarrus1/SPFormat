@@ -32,7 +32,7 @@ pub fn write_alias_declaration(node: Node, writer: &mut Writer) -> Result<(), Ut
             "function_visibility" => write_function_visibility(child, writer)?,
             "type" => write_type(&child, writer)?,
             "old_type" => write_old_type(child, writer)?,
-            "dimension" => write_dimension(child, writer)?,
+            "dimension" => write_dimension(child, writer, true)?,
             "alias_operator" | "operator" => write_node(&child, writer)?,
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "block" => {
@@ -45,7 +45,7 @@ pub fn write_alias_declaration(node: Node, writer: &mut Writer) -> Result<(), Ut
                 }
             }
             _ => {
-                if writer.is_statement(kind.to_string()) {
+                if writer.is_statement(&kind) {
                     write_statement(child, writer, false, false)?;
                 } else {
                     println!("Unexpected kind {} in write_alias_declaration.", kind);
@@ -80,13 +80,13 @@ pub fn write_alias_assignment(node: Node, writer: &mut Writer) -> Result<(), Utf
             "type" => write_type(&child, writer)?,
             "old_type" => write_old_type(child, writer)?,
             "symbol" => write_node(&child, writer)?,
-            "dimension" => write_dimension(child, writer)?,
+            "dimension" => write_dimension(child, writer, true)?,
             "=" => writer.output.push_str(" = "),
             "alias_operator" | "operator" => write_node(&child, writer)?,
             "argument_declarations" => write_argument_declarations(child, writer)?,
             ";" => writer.output.push(';'),
             _ => {
-                if writer.is_statement(kind.to_string()) {
+                if writer.is_statement(&kind) {
                     write_statement(child, writer, false, false)?;
                 } else {
                     println!("Unexpected kind {} in write_alias_declaration.", kind);

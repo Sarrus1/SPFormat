@@ -134,8 +134,8 @@ fn write_struct_field(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
                 writer.output.push(' ');
                 write_node(&sub_node, writer)?;
             }
-            "fixed_dimension" => write_fixed_dimension(sub_node, writer)?,
-            "dimension" => write_dimension(sub_node, writer)?,
+            "fixed_dimension" => write_fixed_dimension(sub_node, writer, true)?,
+            "dimension" => write_dimension(sub_node, writer, true)?,
             ";" => writer.output.push(';'),
             _ => println!("Unexpected kind {} in write_struct_field.", kind),
         }

@@ -46,7 +46,7 @@ new _: d = 2, Float: e, bool: f = true, String: g = 'c';
 new Action: ac = INVALID_HANDLE;
 Action: ac = INVALID_HANDLE;
 vec[MAXPLAYERS + 1];
-vec[] ;
+vec[];
 
 
 stock float operator++(float oper)

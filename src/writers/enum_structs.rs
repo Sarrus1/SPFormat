@@ -74,7 +74,7 @@ fn write_enum_struct_field(node: Node, writer: &mut Writer) -> Result<(), Utf8Er
         match kind.borrow() {
             "type" => write_type(&child, writer)?,
             "symbol" => write_node(&child, writer)?,
-            "fixed_dimension" => write_fixed_dimension(child, writer)?,
+            "fixed_dimension" => write_fixed_dimension(child, writer, true)?,
             ";" => write_node(&child, writer)?,
             _ => {
                 println!("Unexpected kind {} in write_enum_struct_field.", kind);

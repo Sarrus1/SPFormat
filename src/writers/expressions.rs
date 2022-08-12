@@ -210,7 +210,7 @@ fn write_sizeof_expression(node: Node, writer: &mut Writer) -> Result<(), Utf8Er
     writer.output.push_str("sizeof ");
     for child in node.children_by_field_name("type", &mut cursor) {
         match child.kind().borrow() {
-            "dimension" => write_dimension(child, writer)?,
+            "dimension" => write_dimension(child, writer, true)?,
             _ => write_expression(child, writer)?,
         }
     }
@@ -235,7 +235,7 @@ pub fn write_function_call_arguments(node: Node, writer: &mut Writer) -> Result<
             "named_arg" => write_named_arg(child, writer)?,
             _ => {
                 let kind = child.kind();
-                if writer.is_expression(kind.to_string()) {
+                if writer.is_expression(&kind) {
                     write_expression(child, writer)?
                 } else {
                     write_node(&child, writer)?;

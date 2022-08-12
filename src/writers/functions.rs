@@ -25,7 +25,7 @@ pub fn write_function_declaration(node: Node, writer: &mut Writer) -> Result<(),
         match child.kind().borrow() {
             "function_visibility" => write_function_visibility(child, writer)?,
             "type" => write_type(&child, writer)?,
-            "dimension" => write_dimension(child, writer)?,
+            "dimension" => write_dimension(child, writer, true)?,
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "symbol" => write_node(&child, writer)?,
             "block" => {
@@ -60,7 +60,7 @@ pub fn write_function_definition(node: Node, writer: &mut Writer) -> Result<(), 
         match child.kind().borrow() {
             "function_definition_type" => write_function_visibility(child, writer)?,
             "type" => write_type(&child, writer)?,
-            "dimension" => write_dimension(child, writer)?,
+            "dimension" => write_dimension(child, writer, true)?,
             "argument_declarations" => write_argument_declarations(child, writer)?,
             "symbol" => write_node(&child, writer)?,
             _ => write_node(&child, writer)?,
@@ -103,10 +103,10 @@ fn write_argument_declaration(node: Node, writer: &mut Writer) -> Result<(), Utf
             "const" => writer.output.push_str("const "),
             "argument_type" => write_argument_type(child, writer)?,
             "symbol" => write_node(&child, writer)?,
-            "dimension" => write_dimension(child, writer)?,
+            "dimension" => write_dimension(child, writer, true)?,
             "fixed_dimension" => {
                 let next_kind = next_sibling_kind(&child);
-                write_fixed_dimension(child, writer)?;
+                write_fixed_dimension(child, writer, true)?;
                 if next_kind != "dimension" || next_kind != "fixed_dimension" {
                     writer.output.push(' ')
                 };
@@ -132,7 +132,7 @@ fn write_argument_type(node: Node, writer: &mut Writer) -> Result<(), Utf8Error>
                 };
             }
             "type" => write_type(&child, writer)?,
-            "dimension" => write_dimension(child, writer)?,
+            "dimension" => write_dimension(child, writer, true)?,
             _ => write_node(&child, writer)?,
         }
     }

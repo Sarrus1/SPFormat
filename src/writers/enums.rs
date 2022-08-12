@@ -26,7 +26,7 @@ pub fn write_enum(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
             ")" => writer.output.push_str(")"),
             "enum_entries" => write_enum_entries(child, writer)?,
             _ => {
-                if writer.is_expression(kind.to_string()) {
+                if writer.is_expression(&kind) {
                     write_expression(child, writer)?;
                 } else if kind.to_string().ends_with('=') {
                     write_node(&child, writer)?;
@@ -64,7 +64,7 @@ fn write_enum_entries(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> 
             "enum_entry" => write_enum_entry(child, writer)?,
             "," => continue,
             _ => {
-                if writer.is_expression(kind.to_string()) {
+                if writer.is_expression(&kind) {
                     write_expression(child, writer)?;
                 } else if kind.to_string().ends_with('=') {
                     // Match all in place operators, write it, and add a space
@@ -91,10 +91,10 @@ fn write_enum_entry(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
         match kind.borrow() {
             "builtin_type" | "symbol" => write_node(&child, writer)?,
             ":" => writer.output.push_str(": "),
-            "fixed_dimension" => write_fixed_dimension(child, writer)?,
+            "fixed_dimension" => write_fixed_dimension(child, writer, true)?,
             "=" => writer.output.push_str(" = "),
             _ => {
-                if writer.is_expression(kind.to_string()) {
+                if writer.is_expression(&kind) {
                     write_expression(child, writer)?;
                 } else {
                     println!("Unexpected kind {} in write_enum_entry.", kind);

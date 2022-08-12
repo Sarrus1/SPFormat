@@ -12,7 +12,7 @@ use tree_sitter::Node;
 ///
 /// # Arguments
 ///
-/// * `node`   - The preprocessor global variable declaration node to write.
+/// * `node`   - The global variable declaration node to write.
 /// * `writer` - The writer object.
 pub fn write_global_variable_declaration(
     node: &Node,
@@ -194,6 +194,12 @@ fn write_variable_storage_class(node: Node, writer: &mut Writer) -> Result<(), U
     Ok(())
 }
 
+/// Write a variable declaration.
+///
+/// # Arguments
+///
+/// * `node`   - The variable declaration node to write.
+/// * `writer` - The writer object.
 fn write_variable_declaration(node: &Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
 

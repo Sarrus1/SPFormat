@@ -1,7 +1,7 @@
 {
   "name": "playground",
   "private": true,
-  "version": "0.1.12",
+  "version": "0.1.13",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && cp ../pkg/node_modules/web-tree-sitter/tree-sitter.wasm dist/tree-sitter.wasm",

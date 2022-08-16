@@ -25,6 +25,7 @@ pub fn write_global_variable_declaration(
     let mut length = 0;
     let mut max_name_length = 0;
     let mut nb_declarations = 0;
+    let mut nested_comment = false;
     for child in node.children(&mut cursor) {
         let kind = child.kind();
         match kind.borrow() {
@@ -52,11 +53,14 @@ pub fn write_global_variable_declaration(
                     max_name_length = name_length;
                 }
             }
+            // If a nested comment is present, break, even if the line
+            // is too long.
+            "comment" => nested_comment = true,
             _ => continue,
         }
     }
 
-    if length <= 80 {
+    if length <= 80 && !nested_comment {
         max_name_length = 0;
     }
 
@@ -78,13 +82,13 @@ pub fn write_global_variable_declaration(
             }
             "comment" => {
                 write_comment(&child, writer)?;
-                if length > 80 {
+                if length > 80 || nested_comment {
                     writer.output.push_str(" ".repeat(type_length).as_str());
                 }
             }
             "variable_declaration" => write_variable_declaration(&child, writer, max_name_length)?,
             "," => {
-                if length > 80 {
+                if length > 80 || nested_comment {
                     let next_kind = next_sibling_kind(&child);
                     if next_kind == "comment" {
                         writer.output.push_str(",");

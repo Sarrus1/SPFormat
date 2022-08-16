@@ -46,8 +46,7 @@ Action action1,	/* a */
        action6,
        action7,
        action8,
-       action9,
-       action10;
+       action9;	//f
 
 new a;
 const a;

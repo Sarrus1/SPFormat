@@ -18,6 +18,7 @@ pub mod functags;
 pub mod functions;
 pub mod hardcoded_symbols;
 pub mod methodmaps;
+pub mod old_variables;
 pub mod preproc;
 pub mod source_file;
 pub mod statements;

@@ -13,12 +13,13 @@ use super::{
     functions::{write_function_declaration, write_function_definition},
     hardcoded_symbols::write_hardcoded_symbol,
     methodmaps::write_methodmap,
+    old_variables::write_old_global_variable_declaration,
     preproc::{
         write_preproc_define, write_preproc_generic, write_preproc_include, write_preproc_undefine,
     },
     structs::{write_struct, write_struct_declaration},
     typedefs::{write_typedef, write_typeset},
-    variables::{write_global_variable_declaration, write_old_global_variable_declaration},
+    variables::write_global_variable_declaration,
     write_comment, Writer,
 };
 

@@ -3,9 +3,8 @@ use std::{borrow::Borrow, str::Utf8Error};
 use tree_sitter::Node;
 
 use super::{
-    expressions::write_expression,
-    variables::{write_old_variable_declaration_statement, write_variable_declaration_statement},
-    write_comment, write_node, Writer,
+    expressions::write_expression, old_variables::write_old_variable_declaration_statement,
+    variables::write_variable_declaration_statement, write_comment, write_node, Writer,
 };
 
 pub fn write_statement(

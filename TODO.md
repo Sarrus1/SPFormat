@@ -14,7 +14,7 @@
 [ ] struct
 [ ] struct_declaration
 [X] global_variable_declaration
-[ ] old_global_variable_declaration
+[X] old_global_variable_declaration
 [X] preproc_include
 [X] preproc_tryinclude
 [X] preproc_define
@@ -34,7 +34,7 @@
 [ ] alias_assignment
 [ ] block
 [X] variable_declaration_statement
-[ ] old_variable_declaration_statement
+[X] old_variable_declaration_statement
 [ ] for_loop
 [ ] while_loop
 [ ] do_while_loop

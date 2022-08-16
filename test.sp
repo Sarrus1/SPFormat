@@ -39,7 +39,7 @@ int foo = 1, baaaaaar = 10;
 char test[64] = "Hello this is a very long string",
      t[64]    = "Hello this is a very long string";
 Action action1,	/* a */
-       action2,	// b
+       action244,	// b
        action3,
        action4,
        action5,
@@ -55,11 +55,18 @@ new Float: b = 0.23;
 Float: b = 0.23;
 new a = 0 + 1;
 new bool: c;
-new _: d = 2, Float: e, bool: f = true, String: g = 'c';
+new _: d = 2,
+    Float: e,
+    bool: f = true,
+    String: g = 'c',
+    String: g = 'c',
+    String: g = 'c',
+    String: g = 'c';
 new Action: ac = INVALID_HANDLE;
 Action: ac = INVALID_HANDLE;
 vec[MAXPLAYERS + 1];
 vec[];
+
 
 
 stock float operator++(float oper)
@@ -136,6 +143,14 @@ methodmap EmbedFooter < JSONObject
 void OnPluginStart()
 {
 	int foo;	//f
+	new _: d = 2,
+	    Float: e,	//doo
+	    bool: f = true,
+	    String: g = 'c',
+	    String: g = 'c',
+	    String: g = 'c',
+	    String: g = 'c';	//foo
+
 	Action action1,	/* a */
 	       action2,	// b
 	       action3,

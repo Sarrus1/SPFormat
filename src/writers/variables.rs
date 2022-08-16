@@ -215,29 +215,6 @@ pub fn write_variable_declaration_statement(
     Ok(())
 }
 
-/// Write a variable storage class.
-///
-/// # Arguments
-///
-/// * `node`   - The variable storage class node to write.
-/// * `writer` - The writer object.
-pub fn write_variable_storage_class(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    let mut cursor = node.walk();
-
-    for child in node.children(&mut cursor) {
-        let kind = node.kind();
-        match kind.borrow() {
-            "const" | "static" => {
-                write_node(&child, writer)?;
-                writer.output.push(' ');
-            }
-            _ => println!("Unexpected kind {} in write_variable_storage_class.", kind),
-        }
-    }
-
-    Ok(())
-}
-
 /// Write a variable declaration.
 ///
 /// # Arguments

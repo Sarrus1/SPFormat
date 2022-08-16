@@ -167,6 +167,12 @@ fn get_max_name_length(node: &Node) -> Result<usize, Utf8Error> {
     Ok(max_name_length)
 }
 
+/// Write a variable declaration statement.
+///
+/// # Arguments
+///
+/// * `node`   - The variable declaration statement node to write.
+/// * `writer` - The writer object.
 pub fn write_variable_declaration_statement(
     node: Node,
     writer: &mut Writer,
@@ -297,16 +303,23 @@ fn write_old_variable_declaration(node: Node, writer: &mut Writer) -> Result<(),
     Ok(())
 }
 
+/// Write a variable storage class.
+///
+/// # Arguments
+///
+/// * `node`   - The variable storage class node to write.
+/// * `writer` - The writer object.
 fn write_variable_storage_class(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
     let mut cursor = node.walk();
 
-    for sub_node in node.children(&mut cursor) {
-        match sub_node.kind().borrow() {
+    for child in node.children(&mut cursor) {
+        let kind = node.kind();
+        match kind.borrow() {
             "const" | "static" => {
-                write_node(&sub_node, writer)?;
+                write_node(&child, writer)?;
                 writer.output.push(' ');
             }
-            _ => write_node(&sub_node, writer)?,
+            _ => println!("Unexpected kind {} in write_variable_storage_class.", kind),
         }
     }
 
@@ -325,8 +338,11 @@ fn write_variable_declaration(
     writer: &mut Writer,
     max_name_length: usize,
 ) -> Result<(), Utf8Error> {
-    let mut name_length = 0;
     let mut cursor = node.walk();
+
+    // Keep track of the name length (including dimensions) in order
+    // to properly align the `=` sign.
+    let mut name_length = 0;
 
     for child in node.children(&mut cursor) {
         let kind = child.kind();
@@ -344,7 +360,7 @@ fn write_variable_declaration(
                 name_length += 2;
             }
             "=" => {
-                if max_name_length != 0 {
+                if max_name_length > 0 {
                     writer
                         .output
                         .push_str(" ".repeat(max_name_length - name_length).as_str());

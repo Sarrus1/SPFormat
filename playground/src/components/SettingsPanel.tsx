@@ -129,6 +129,27 @@ function SettingsPanel(props: SettingsPanelProps) {
         }}
         defaultValue={2}
       />
+      <SettingRowNumeric
+        name="Breaks before enum"
+        onChange={(e) => {
+          props.settings.breaks_before_enum = Number(e.target.value);
+        }}
+        defaultValue={2}
+      />
+      <SettingRowNumeric
+        name="Breaks before enum struct"
+        onChange={(e) => {
+          props.settings.breaks_before_enum_struct = Number(e.target.value);
+        }}
+        defaultValue={2}
+      />
+      <SettingRowNumeric
+        name="Breaks before methodmap"
+        onChange={(e) => {
+          props.settings.breaks_before_methodmap = Number(e.target.value);
+        }}
+        defaultValue={2}
+      />
       <BraceWrappingRow {...props} />
     </div>
   );

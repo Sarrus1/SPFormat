@@ -8,7 +8,7 @@ use super::{
 };
 
 pub fn write_enum_struct(node: Node, writer: &mut Writer) -> Result<(), Utf8Error> {
-    let nb_lines: usize = usize::try_from(writer.settings.breaks_before_function_decl).unwrap();
+    let nb_lines: usize = usize::try_from(writer.settings.breaks_before_enum_struct).unwrap();
     let prev_kind = prev_sibling_kind(&node);
 
     if !prev_kind.starts_with("preproc_") && prev_kind != "" && prev_kind != "comment" {

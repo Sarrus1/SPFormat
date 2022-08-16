@@ -23,6 +23,18 @@ pub struct Args {
     #[clap(long, value_parser, default_value_t = 2)]
     breaks_before_function_def: u32,
 
+    /// Number of empty lines to insert before an enum declaration.
+    #[clap(long, value_parser, default_value_t = 2)]
+    breaks_before_enum: u32,
+
+    /// Number of empty lines to insert before an enum struct declaration.
+    #[clap(long, value_parser, default_value_t = 2)]
+    breaks_before_enum_struct: u32,
+
+    /// Number of empty lines to insert before a methodmap declaration.
+    #[clap(long, value_parser, default_value_t = 2)]
+    breaks_before_methodmap: u32,
+
     /// Whether or not to break before a function declaration brace.
     #[clap(long, value_parser, default_value_t = true)]
     brace_wrapping_before_function: bool,
@@ -65,6 +77,9 @@ pub fn build_settings_from_args(args: &Args) -> Settings {
     let settings = Settings {
         breaks_before_function_def: args.breaks_before_function_def,
         breaks_before_function_decl: args.breaks_before_function_decl,
+        breaks_before_enum: args.breaks_before_enum,
+        breaks_before_enum_struct: args.breaks_before_enum_struct,
+        breaks_before_methodmap: args.breaks_before_methodmap,
         brace_wrapping_before_function: args.brace_wrapping_before_function,
         brace_wrapping_before_loop: args.brace_wrapping_before_loop,
         brace_wrapping_before_condition: args.brace_wrapping_before_condition,

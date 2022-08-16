@@ -135,6 +135,17 @@ methodmap EmbedFooter < JSONObject
 
 void OnPluginStart()
 {
+	int foo;	//f
+	Action action1,	/* a */
+	       action2,	// b
+	       action3,
+	       action4,
+	       action5,
+	       action6,
+	       action7,
+	       action8,
+	       action9;	//f
+
 	if(true)
 	{
 		te++;

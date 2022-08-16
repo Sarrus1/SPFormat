@@ -55,14 +55,26 @@ pub fn write_statement(
         _ => write_node(&node, writer)?,
     }
     if do_break {
-        // Add another break if the next sibling is not right below/next
-        // to the current sibling.
-        if !next_sibling.is_none() {
+        if next_sibling.is_none() {
+            writer.breakl();
+            return Ok(());
+        }
+        let st = next_sibling.as_ref().unwrap().start_position().row();
+
+        // Don't add a break if the next sibling is a trailing comment.
+        if next_sibling.as_ref().unwrap().kind() == "comment" {
             let st = next_sibling.unwrap().start_position().row();
-            if st - sp > 1 {
-                writer.breakl();
+            if st - sp == 0 {
+                return Ok(());
             }
         }
+
+        // Add another break if the next sibling is not right below/next
+        // to the current sibling.
+        if st - sp > 1 {
+            writer.breakl();
+        }
+
         writer.breakl();
     }
 

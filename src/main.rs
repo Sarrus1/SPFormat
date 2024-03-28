@@ -115,3 +115,9 @@ fn main() -> Result<(), Utf8Error> {
     std::io::stdin().read_line(&mut String::new()).unwrap();
     Ok(())
 }
+
+autocxx::include_cpp! {
+    #include "clang/lib/Format/Format.cpp"
+    generate!("reformat")
+    safety!(unsafe_ffi)
+}

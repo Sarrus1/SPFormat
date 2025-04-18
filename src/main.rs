@@ -106,12 +106,8 @@ fn main() -> Result<(), Utf8Error> {
     let output = format_string(&source, settings).unwrap();
     if output.len() == 0 && source.trim().len() > 0 {
         // An error occured, don't write to the file.
-        println!("Press any key to exit...");
-        std::io::stdin().read_line(&mut String::new()).unwrap();
         return Ok(());
     }
     fs::write(&filename, output).expect("Something went wrong while writing the file.");
-    println!("Press any key to exit...");
-    std::io::stdin().read_line(&mut String::new()).unwrap();
     Ok(())
 }

@@ -10,10 +10,10 @@ jobs:
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: jetli/wasm-pack-action@v0.3.0
         with:
-          version: "latest"
+          version: "v0.10.3"
       - name: Build wasm
         run: wasm-pack build --target web
       - name: Download pkg deps
@@ -23,8 +23,8 @@ jobs:
       - name: Get version
         run: |
           tmp=$(cargo pkgid)
-          tmp=$(${a#*@})
-          echo "PACKAGE_VERSION=$(echo $tmp)" >> $GITHUB_ENV
+          tmp=${tmp#*@}
+          echo "PACKAGE_VERSION=$tmp" >> $GITHUB_ENV
       - name: Create Release
         uses: ncipollo/release-action@v1
         env:
@@ -43,39 +43,68 @@ jobs:
         with:
           folder: playground/dist
 
-  release:
+  build:
     name: release ${{ matrix.target }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - target: x86_64-pc-windows-gnu
-            archive: zip
-          - target: x86_64-unknown-linux-musl
-            archive: tar.gz tar.xz
+            archive: sp_format-windows.zip
+            os: windows-latest
+          - target: x86_64-unknown-linux-gnu
+            archive: sp_format-linux.tar.gz
+            os: ubuntu-latest
           - target: x86_64-apple-darwin
-            archive: zip
+            archive: sp_format-macos.zip
+            os: macos-latest
     steps:
-      - uses: actions/checkout@master
-      - name: Compile and release
-        uses: rust-build/rust-build.action@v1.3.2
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.85.1
+          targets: ${{ matrix.target }}
+      - name: Compile
+        run: cargo build --target ${{ matrix.target }} --all-features --release --locked
+      - name: Compress (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: Compress-Archive -Path target/${{ matrix.target }}/release/sp_format.exe -DestinationPath ${{ matrix.archive }}
+      - name: Compress (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: zip ${{ matrix.archive }} target/${{ matrix.target }}/release/sp_format
+      - name: Compress (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: tar -czvf ${{ matrix.archive }} -C target/${{ matrix.target }}/release sp_format
+      - name: Upload sp_format binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: ${{ matrix.archive }}
+
+  github:
+    name: Publish releases
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+      - name: Publish binaries
+        run: |
+          gh release upload ${{ github.ref_name }} $(find . -iname sp_format*.zip || true)
+          gh release upload ${{ github.ref_name }} $(find . -iname sp_format*.tar.gz || true)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          RUSTTARGET: ${{ matrix.target }}
-          ARCHIVE_TYPES: ${{ matrix.archive }}
 
   cargo:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          override: true
+          toolchain: 1.85.1
       - uses: katyo/publish-crates@v1
         with:
           registry-token: ${{ secrets.CARGO_REGISTRY_TOKEN }}

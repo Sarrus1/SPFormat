@@ -1,6 +1,6 @@
 [package]
 name = "sp_format"
-version = "0.1.13"
+version = "0.1.14"
 description = "sourcepawn grammar for the tree-sitter parsing library"
 keywords = ["tree-sitter", "formatter", "sourcepawn"]
 categories = ["development-tools"]
@@ -35,7 +35,7 @@ web-tree-sitter-sys = "1.3"
 clap = { version = "3.2.15", features = ["derive"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-tree-sitter-sourcepawn = { git = "https://github.com/Sarrus1/tree-sitter-sourcepawn", version="0.5.1" }
+tree-sitter-sourcepawn = { git = "https://github.com/Sarrus1/tree-sitter-sourcepawn", version = "0.5.1" }
 
 [build-dependencies]
 cc = "1.0"
